@@ -1,0 +1,3312 @@
+<!--
+================================================================================
+ARCHITECTURE & DESIGN SYSTEM
+================================================================================
+1. DESIGN TOKENS
+   - Typefaces: 'Inter' (sans-serif), 'Instrument Serif' (italic display accents)
+   - Colors:
+     * Ink: #1A0B2E | Deep Navy: #0F172A | Champagne Gold: #C5A059
+     * Accents: Coral #FF6B5B | Amber #FFB020 | Teal #14B8A6 | Sky #38BDF8 | Violet #7C5CFF | Pink #F43F9A
+   - Glassmorphism:
+     * Ink worlds: rgba(255,255,255,0.58), backdrop-filter: blur(18px) saturate(160%)
+     * Dark worlds: rgba(255,255,255,0.12), border: 1px solid rgba(255,255,255,0.28)
+   - Radius: 28px (cards), 999px (pills), 48px (world tops)
+   - Motion: --ease: cubic-bezier(0.16, 1, 0.3, 1); dur: 0.5s / 0.9s / 1.3s
+
+2. SECTION MAP ("One Day, One Journey" - Route Line & Timings Removed)
+   - 00: Nav & Brand Bar (frosted logo plate, official brand emblem, progress bar)
+   - 01: Sunrise (Hero: sun orb rise, layered hills parallax, luxury touring van stage, floating chips)
+   - 02: Morning Sky (Ride: touring van presentation + 4 experience cards)
+   - 03: Lagoon Noon (Destinations: 6 editorial scenery SVG cards + marquee)
+   - 04: Golden Hour (Why Holiday Hype: 5-card bento grid + Indore wide card)
+   - 05: Blush (Stories: draggable review carousel with 5-star cards)
+   - 06: Dusk (The Feeling: scroll-scrubbed kinetic statement)
+   - 07: Twilight (Plan Trip: 4-field validated WhatsApp booking form + direct call row)
+   - 08: Night (Footer: 3px multicolor hairline, brand statement, links, contact info)
+   - 09: Floating Quick Action Dock (calls + WhatsApp live pulse)
+
+3. ANIMATION TIMELINE
+   - Loader (1.0s max) -> Hero entrance (Sun rises, hills shift, vehicle glides, chips bob)
+   - Scrubbed word-by-word reveal on Dusk statement
+   - Lenis smooth scroll synced with GSAP ticker; prefers-reduced-motion fallback
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Holiday Hype | Premium Joyful Group Travel From Indore</title>
+  <meta name="description" content="Travel anywhere from Indore with The Holiday Hype. Joyful, premium group travel experiences, chauffeur-driven comfort, and unforgettable journeys." />
+  <meta property="og:title" content="The Holiday Hype | Premium Joyful Group Travel From Indore" />
+  <meta property="og:description" content="Your journey, our passion. Travel in comfort and explore more together with The Holiday Hype." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#FF6B5B" />
+  <link rel="icon" type="image/png" href="./logo.png" />
+  <link rel="preload" href="/src/assets/images/regenerated_image_1791017075250.jpg" as="image" fetchpriority="high" />
+
+  <!-- Google Fonts Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Instrument+Serif:ital@1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- CDNs: Tailwind, GSAP, ScrollTrigger, Lenis, Lucide -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TravelAgency",
+    "name": "The Holiday Hype",
+    "image": "./logo.png",
+    "telephone": ["+919977159028", "+919926992777"],
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Indore",
+      "addressRegion": "Madhya Pradesh",
+      "addressCountry": "IN"
+    },
+    "areaServed": "IN",
+    "url": "https://theholidayhype.com",
+    "priceRange": "$$"
+  }
+  </script>
+
+  <style>
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --color-ink: #1A0B2E;
+      --color-navy: #0F172A;
+      --color-gold: #C5A059;
+      --color-coral: #FF6B5B;
+      --color-amber: #FFB020;
+      --color-teal: #14B8A6;
+      --color-sky: #38BDF8;
+      --color-violet: #7C5CFF;
+      --color-pink: #F43F9A;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      --dur-s: 0.5s;
+      --dur-m: 0.9s;
+      --dur-l: 1.3s;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: #0B1026;
+      color: var(--color-ink);
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    .font-serif-italic {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    /* Film grain overlay */
+    .film-grain {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 99;
+      opacity: 0.055;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Color Worlds */
+    .world-sunrise {
+      background: linear-gradient(160deg, #FFC371 0%, #FF6B5B 45%, #F43F9A 100%);
+      color: #1A0B2E;
+    }
+    .world-morningsky {
+      background: linear-gradient(165deg, #BAE6FD 0%, #38BDF8 50%, #0EA5E9 100%);
+      color: #1A0B2E;
+    }
+    .world-lagoon {
+      background: linear-gradient(160deg, #A7F3D0 0%, #2DD4BF 50%, #14B8A6 100%);
+      color: #1A0B2E;
+    }
+    .world-goldenhour {
+      background: linear-gradient(160deg, #FEF08A 0%, #FBBF24 50%, #FB923C 100%);
+      color: #1A0B2E;
+    }
+    .world-blush {
+      background: linear-gradient(160deg, #FBCFE8 0%, #F9A8D4 50%, #FDBA74 100%);
+      color: #1A0B2E;
+    }
+    .world-dusk {
+      background: linear-gradient(170deg, #2E1065 0%, #6D28D9 55%, #BE185D 100%);
+      color: #FFFFFF;
+    }
+    .world-twilight {
+      background: linear-gradient(170deg, #1E1B4B 0%, #4338CA 50%, #7C3AED 100%);
+      color: #FFFFFF;
+    }
+    .world-night {
+      background: #0B1026;
+      color: #FFFFFF;
+    }
+
+    /* Overlapping Stacked Worlds */
+    .color-world {
+      position: relative;
+      margin-top: -24px;
+      padding-top: clamp(4.5rem, 8vw, 8rem);
+      padding-bottom: clamp(5rem, 9vw, 9rem);
+    }
+    .color-world:first-of-type {
+      margin-top: 0;
+    }
+    .color-world:not(:first-of-type) {
+      transform-origin: center top;
+      transition: filter 0.6s ease;
+    }
+    .color-world.intersecting {
+      filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.04));
+    }
+    .color-world-divider {
+      position: absolute;
+      top: 1px;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+      line-height: 0;
+      pointer-events: none;
+      transform: translateY(-98%);
+      z-index: 20;
+    }
+    .color-world-divider svg {
+      width: 100%;
+      height: clamp(36px, 5.5vw, 76px);
+      display: block;
+    }
+
+    /* Glass Cards */
+    .glass-ink {
+      background: rgba(255, 255, 255, 0.58);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      color: #1A0B2E;
+      border-radius: 28px;
+    }
+    .glass-dark {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      color: #FFFFFF;
+      border-radius: 28px;
+    }
+
+    /* Bento Grid Magnetic Cards */
+    .bento-card {
+      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+      will-change: transform;
+      transform-style: preserve-3d;
+    }
+
+    /* Scrollbar Utilities for Snap Rails */
+    .no-scrollbar::-webkit-scrollbar,
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar,
+    .scrollbar-none {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Official Logo Plate */
+    .logo-plate {
+      background: rgba(255, 255, 255, 0.84);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 999px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* 40px Rounded Vehicle Stage */
+    .vehicle-stage-40 {
+      border-radius: 40px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      background: #FDF4EC;
+      position: relative;
+    }
+
+    /* Drifting background blobs */
+    .color-blob {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(80px);
+      pointer-events: none;
+      opacity: 0.45;
+      z-index: 0;
+    }
+
+    /* Custom Cursor Ring (Desktop) */
+    #cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--color-navy);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s var(--ease), height 0.3s var(--ease), background 0.3s, border-color 0.3s;
+      display: none;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      #cursor-ring { display: flex; align-items: center; justify-content: center; }
+    }
+    #cursor-ring.active-pointer {
+      width: 58px;
+      height: 58px;
+      background: rgba(15, 23, 42, 0.9);
+      border-color: var(--color-gold);
+    }
+    #cursor-ring span {
+      display: none;
+      font-size: 11px;
+      font-weight: 600;
+      color: #FFFFFF;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    #cursor-ring.active-pointer span {
+      display: block;
+    }
+
+    /* Floating Chips Animation */
+    @keyframes gentleBob1 {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+    @keyframes gentleBob2 {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+    .bob-1 { animation: gentleBob1 4.8s ease-in-out infinite; }
+    .bob-2 { animation: gentleBob2 5.2s ease-in-out infinite 0.6s; }
+    .bob-3 { animation: gentleBob1 4.5s ease-in-out infinite 1.2s; }
+
+    /* Infinite Marquee */
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marquee 24s linear infinite;
+    }
+    .marquee-track:hover {
+      animation-play-state: paused;
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Form Autofill & Styles */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus {
+      -webkit-text-fill-color: #FFFFFF;
+      -webkit-box-shadow: 0 0 0px 1000px rgba(30, 27, 75, 0.8) inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+
+    /* Accessibility focus ring */
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline: 2px solid var(--color-gold);
+      outline-offset: 3px;
+    }
+
+    /* Progressive enhancement */
+    html:not(.js-ready) .hero-anim-target {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    /* =========================================================================
+       DAYTIME THEME (Light Theme)
+       ========================================================================= */
+    html.theme-day body {
+      background-color: #F8FAFC !important;
+      color: #0F172A !important;
+    }
+
+    /* Section 6 (Dusk) in Day Mode -> Luminous warm daylight */
+    html.theme-day .world-dusk {
+      background: linear-gradient(165deg, #FFF7ED 0%, #FFEDD5 45%, #FEE2E2 100%) !important;
+      color: #1A0B2E !important;
+    }
+    html.theme-day .world-dusk #dusk-scrub-text {
+      color: #0F172A !important;
+    }
+    html.theme-day .world-dusk #dusk-scrub-text .text-amber-300 {
+      color: #B45309 !important;
+    }
+    html.theme-day .world-dusk #dusk-scrub-text .text-rose-300 {
+      color: #BE123C !important;
+    }
+    html.theme-day .world-dusk p {
+      color: #334155 !important;
+    }
+    html.theme-day .world-dusk .text-white\/85,
+    html.theme-day .world-dusk .text-white\/80 {
+      color: #475569 !important;
+    }
+    html.theme-day .world-dusk .border-white\/20 {
+      border-color: rgba(15, 23, 42, 0.12) !important;
+    }
+    html.theme-day .world-dusk .bg-white\/\[0\.08\] {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.08) !important;
+    }
+    html.theme-day .world-dusk .text-amber-300 {
+      color: #D97706 !important;
+    }
+    html.theme-day .world-dusk .text-sky-400 {
+      color: #0284C7 !important;
+    }
+    html.theme-day .world-dusk .text-rose-400 {
+      color: #E11D48 !important;
+    }
+    html.theme-day .world-dusk .text-emerald-400 {
+      color: #059669 !important;
+    }
+    html.theme-day .world-dusk .color-world-divider {
+      color: #FFF7ED !important;
+    }
+
+    /* Section 7 (Plan Trip / Twilight) in Day Mode -> Fresh daylight azure */
+    html.theme-day .world-twilight {
+      background: linear-gradient(165deg, #F0F9FF 0%, #E0F2FE 45%, #EDE9FE 100%) !important;
+      color: #0F172A !important;
+    }
+    html.theme-day .world-twilight .color-world-divider {
+      color: #F0F9FF !important;
+    }
+    html.theme-day .world-twilight h2 {
+      color: #0F172A !important;
+    }
+    html.theme-day .world-twilight h2 .text-amber-300 {
+      color: #B45309 !important;
+    }
+    html.theme-day .world-twilight p {
+      color: #334155 !important;
+    }
+    html.theme-day .world-twilight .text-white\/80,
+    html.theme-day .world-twilight .text-white\/85 {
+      color: #475569 !important;
+    }
+    html.theme-day .world-twilight .bg-white\/10 {
+      background-color: rgba(255, 255, 255, 0.75) !important;
+      border-color: rgba(15, 23, 42, 0.12) !important;
+    }
+    html.theme-day .world-twilight .text-amber-300 {
+      color: #B45309 !important;
+    }
+
+    /* Booking Form Glass Card in Day Theme */
+    html.theme-day #plan-trip .glass-dark {
+      background: rgba(255, 255, 255, 0.94) !important;
+      border: 1px solid rgba(15, 23, 42, 0.1) !important;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.12) !important;
+      color: #0F172A !important;
+    }
+    html.theme-day #plan-trip input:not([type="hidden"]),
+    html.theme-day #plan-trip select {
+      background-color: #FFFFFF !important;
+      border-color: #CBD5E1 !important;
+      color: #0F172A !important;
+    }
+    html.theme-day #plan-trip input::placeholder {
+      color: #94A3B8 !important;
+    }
+    html.theme-day #plan-trip label {
+      color: #334155 !important;
+    }
+    html.theme-day #plan-trip .text-white\/40,
+    html.theme-day #plan-trip .text-white\/50,
+    html.theme-day #plan-trip .text-white\/60,
+    html.theme-day #plan-trip .text-white\/70,
+    html.theme-day #plan-trip .text-white\/80 {
+      color: #475569 !important;
+    }
+    html.theme-day #plan-trip .bg-white\/10,
+    html.theme-day #plan-trip .bg-white\/15 {
+      background-color: #F8FAFC !important;
+      border-color: #CBD5E1 !important;
+      color: #0F172A !important;
+    }
+    html.theme-day #plan-trip .pax-btn:not(.bg-amber-400) {
+      background-color: #FFFFFF !important;
+      border-color: #CBD5E1 !important;
+      color: #1E293B !important;
+    }
+    html.theme-day #plan-trip .pax-btn:not(.bg-amber-400):hover {
+      background-color: #F1F5F9 !important;
+    }
+    html.theme-day #plan-trip .pax-btn.bg-amber-400 {
+      background-color: #F59E0B !important;
+      color: #0F172A !important;
+    }
+    html.theme-day #plan-trip #pax-btn-custom {
+      background-color: #FEF3C7 !important;
+      border-color: #F59E0B !important;
+      color: #92400E !important;
+    }
+    html.theme-day #plan-trip #btn-reset-indore {
+      color: #2563EB !important;
+    }
+    html.theme-day #plan-trip .dest-chip {
+      background-color: #F8FAFC !important;
+      border-color: #CBD5E1 !important;
+      color: #334155 !important;
+    }
+    html.theme-day #plan-trip .dest-chip:hover {
+      background-color: #FEF3C7 !important;
+      border-color: #F59E0B !important;
+      color: #92400E !important;
+    }
+    html.theme-day #plan-trip input[type="date"] {
+      color-scheme: light !important;
+    }
+
+    /* Footer in Day Theme */
+    html.theme-day footer.world-night {
+      background: #F1F5F9 !important;
+      color: #0F172A !important;
+      border-top: 1px solid rgba(15, 23, 42, 0.08) !important;
+    }
+    html.theme-day footer.world-night p,
+    html.theme-day footer.world-night span,
+    html.theme-day footer.world-night a {
+      color: #334155;
+    }
+    html.theme-day footer.world-night a:hover {
+      color: #0F172A;
+    }
+    html.theme-day footer.world-night h4 {
+      color: #0F172A !important;
+    }
+    html.theme-day footer.world-night .border-white\/15 {
+      border-color: rgba(15, 23, 42, 0.1) !important;
+    }
+    html.theme-day footer.world-night .text-white\/50 {
+      color: #64748B !important;
+    }
+    html.theme-day footer.world-night .text-white\/70,
+    html.theme-day footer.world-night .text-white\/80 {
+      color: #475569 !important;
+    }
+    html.theme-day footer.world-night .bg-white\/10 {
+      background-color: rgba(15, 23, 42, 0.06) !important;
+      color: #0F172A !important;
+    }
+    html.theme-day footer.world-night .bg-white\/10:hover {
+      background-color: rgba(15, 23, 42, 0.12) !important;
+    }
+
+    /* Floating Dock in Day Theme */
+    html.theme-day #floating-dock > div {
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-color: rgba(15, 23, 42, 0.12) !important;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15) !important;
+    }
+    html.theme-day #floating-dock a,
+    html.theme-day #floating-dock button {
+      color: #0F172A !important;
+    }
+    html.theme-day #floating-dock .bg-white\/20 {
+      background-color: rgba(15, 23, 42, 0.12) !important;
+    }
+    html.theme-day #floating-dock #open-chat-modal {
+      background: linear-gradient(to right, rgba(245, 158, 11, 0.15), rgba(20, 184, 166, 0.15)) !important;
+      border-color: rgba(245, 158, 11, 0.5) !important;
+      color: #0F172A !important;
+    }
+
+    /* Popups and Modals in Day Theme */
+    html.theme-day #phone-popup-card {
+      background: #FFFFFF !important;
+      border-color: #FBBF24 !important;
+      color: #0F172A !important;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    }
+    html.theme-day #phone-popup-card h3 {
+      color: #0F172A !important;
+    }
+    html.theme-day #phone-popup-card p {
+      color: #475569 !important;
+    }
+
+    html.theme-day #quick-inquiries-modal > div > div {
+      background: #FFFFFF !important;
+      border-color: #E2E8F0 !important;
+      color: #0F172A !important;
+    }
+    html.theme-day #quick-inquiries-modal .bg-white\/10 {
+      background-color: #F1F5F9 !important;
+      color: #0F172A !important;
+    }
+    html.theme-day #quick-inquiries-modal .text-white,
+    html.theme-day #quick-inquiries-modal .text-white\/90,
+    html.theme-day #quick-inquiries-modal .text-white\/95 {
+      color: #0F172A !important;
+    }
+    html.theme-day #quick-inquiries-modal .text-white\/60,
+    html.theme-day #quick-inquiries-modal .text-white\/70 {
+      color: #64748B !important;
+    }
+    html.theme-day #quick-inquiries-modal .border-white\/15,
+    html.theme-day #quick-inquiries-modal .border-white\/10 {
+      border-color: #E2E8F0 !important;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-amber-400 selection:text-slate-900">
+
+  <!-- Accessible Skip Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[101] focus:px-4 focus:py-2 focus:bg-white focus:text-slate-900 focus:rounded-lg focus:shadow-xl font-medium">Skip to main content</a>
+
+  <!-- Custom Cursor Ring -->
+  <div id="cursor-ring" aria-hidden="true"><span id="cursor-label">View</span></div>
+
+  <!-- Film Grain Overlay -->
+  <div class="film-grain" aria-hidden="true"></div>
+
+  <!-- Initial Smooth Loader -->
+  <div id="site-loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-700 pointer-events-none">
+    <div class="logo-plate px-7 py-3.5 mb-6 shadow-2xl scale-95 transition-transform duration-500" id="loader-logo">
+      <img src="./logo.png" alt="The Holiday Hype - Your Journey, Our Passion" class="h-14 sm:h-16 w-auto object-contain max-w-[280px]" onerror="this.outerHTML='<span class=\'text-slate-900 font-bold tracking-tight text-xl px-4 py-2\'>THE HOLIDAY HYPE</span>'" />
+    </div>
+    <div class="w-48 h-1 bg-white/20 rounded-full overflow-hidden">
+      <div id="loader-bar" class="h-full bg-gradient-to-r from-amber-400 via-rose-500 to-amber-300 w-0 transition-all duration-700 ease-out"></div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <header id="main-nav" class="fixed top-0 left-0 right-0 z-[50] transition-all duration-300 py-3.5 px-4 sm:px-8">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <!-- Official Brand Logo on Frosted Plate -->
+      <a href="#hero" class="logo-plate px-4 sm:px-5 py-2 hover:shadow-lg transition-transform active:scale-95" aria-label="The Holiday Hype - Home">
+        <img src="./logo.png" alt="The Holiday Hype Logo" class="h-10 sm:h-12 w-auto object-contain max-w-[190px] sm:max-w-[220px]" onerror="this.outerHTML='<span class=\'text-slate-900 font-bold tracking-tight px-2 py-0.5 text-base\'>THE HOLIDAY HYPE</span>'" />
+      </a>
+
+      <!-- Desktop Links -->
+      <nav class="hidden md:flex items-center gap-7 bg-white/70 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/80 shadow-sm text-sm font-semibold text-slate-900" aria-label="Main Navigation">
+        <a href="#hero" class="hover:text-rose-600 transition-colors">Home</a>
+        <a href="#ride" class="hover:text-rose-600 transition-colors">Experience</a>
+        <a href="#ride" class="hover:text-rose-600 transition-colors">Our Vehicle</a>
+        <a href="#destinations" class="hover:text-rose-600 transition-colors">Journeys</a>
+        <a href="#why-us" class="hover:text-rose-600 transition-colors">About</a>
+        <a href="#plan-trip" class="hover:text-rose-600 transition-colors">Contact</a>
+      </nav>
+
+      <!-- Action Button & Mobile Menu Toggle -->
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <!-- Theme Toggle Switch (Night / Daytime Theme) -->
+        <button 
+          id="theme-toggle" 
+          type="button" 
+          class="relative inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-white/80 hover:bg-white text-slate-800 border border-white/90 shadow-sm backdrop-blur-md transition-all duration-300 cursor-pointer text-xs font-bold focus:outline-none hover:shadow-md active:scale-95" 
+          aria-label="Toggle between Night and Day theme"
+          title="Toggle theme"
+        >
+          <span class="flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-extrabold text-slate-900">
+            <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-600 transition-transform duration-300" id="theme-toggle-icon"></i>
+            <span id="theme-toggle-text">Night</span>
+          </span>
+          <div class="relative w-8 h-4 bg-slate-800 rounded-full transition-colors p-0.5 flex items-center" id="theme-toggle-track">
+            <div class="w-3 h-3 rounded-full bg-amber-400 shadow-sm transform transition-transform duration-300" id="theme-toggle-thumb"></div>
+          </div>
+        </button>
+
+        <a href="#plan-trip" class="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-[#0F172A] hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-transform active:scale-95 border border-amber-400/40" data-cursor="Plan">
+          Plan Your Journey
+        </a>
+        <button id="mobile-toggle" type="button" class="md:hidden logo-plate p-2.5 text-slate-900 focus:outline-none" aria-label="Open mobile navigation menu" aria-expanded="false" aria-controls="mobile-menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scroll Progress Bar -->
+    <div class="absolute bottom-0 left-0 h-[2px] w-full bg-transparent">
+      <div id="scroll-progress-bar" class="h-full w-0 bg-gradient-to-r from-amber-400 via-rose-500 to-indigo-600"></div>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Menu -->
+  <div id="mobile-menu" class="fixed inset-0 z-[60] bg-slate-950/95 backdrop-blur-2xl flex flex-col justify-between p-8 text-white translate-x-full transition-transform duration-500 ease-out md:hidden" aria-hidden="true">
+    <div class="flex items-center justify-between">
+      <div class="logo-plate px-4 py-2">
+        <img src="./logo.png" alt="The Holiday Hype" class="h-9 w-auto object-contain" onerror="this.outerHTML='<span class=\'text-slate-900 font-bold tracking-tight px-2\'>THE HOLIDAY HYPE</span>'" />
+      </div>
+      <button id="mobile-close" type="button" class="p-2 text-white/80 hover:text-white" aria-label="Close mobile navigation menu">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <div class="flex flex-col gap-6 text-2xl font-semibold tracking-tight">
+      <a href="#hero" class="mobile-nav-link hover:text-amber-400 transition-colors">Home</a>
+      <a href="#ride" class="mobile-nav-link hover:text-amber-400 transition-colors">Experience</a>
+      <a href="#ride" class="mobile-nav-link hover:text-amber-400 transition-colors">Our Vehicle</a>
+      <a href="#destinations" class="mobile-nav-link hover:text-amber-400 transition-colors">Journeys</a>
+      <a href="#why-us" class="mobile-nav-link hover:text-amber-400 transition-colors">About</a>
+      <a href="#plan-trip" class="mobile-nav-link hover:text-amber-400 transition-colors">Contact</a>
+    </div>
+
+    <div class="space-y-4 pt-6 border-t border-white/10">
+      <!-- Mobile Theme Switch -->
+      <div class="flex items-center justify-between py-2.5 px-4 rounded-2xl bg-white/10 border border-white/15">
+        <span class="text-xs font-semibold uppercase tracking-wider text-white flex items-center gap-2">
+          <i data-lucide="sun-medium" class="w-4 h-4 text-amber-300"></i>
+          <span>Theme Mode</span>
+        </span>
+        <button id="theme-toggle-mobile" type="button" class="px-3.5 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer">
+          <i data-lucide="moon" class="w-3.5 h-3.5 text-amber-300" id="mobile-theme-icon"></i>
+          <span id="mobile-theme-text">Night Theme</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-2 text-sm text-white/70">
+        <span>Call directly from Indore:</span>
+        <a href="tel:+919977159028" class="text-amber-400 font-bold text-base hover:underline">+91 99771 59028</a>
+        <a href="tel:+919926992777" class="text-amber-400 font-bold text-base hover:underline">+91 99269 92777</a>
+      </div>
+      <a href="#plan-trip" class="mobile-nav-link block text-center w-full py-3.5 rounded-full bg-gradient-to-r from-amber-400 to-rose-500 text-slate-950 font-bold uppercase tracking-wider text-xs shadow-lg">
+        Plan Your Journey
+      </a>
+    </div>
+  </div>
+
+  <!-- MAIN WRAPPER -->
+  <main id="main-content" class="relative z-[1]">
+
+    <!-- =========================================================================
+         01 SUNRISE (Hero)
+         ========================================================================= -->
+    <section id="hero" class="color-world world-sunrise min-h-screen flex flex-col justify-center overflow-hidden z-[10]">
+      <!-- Background Blobs -->
+      <div class="color-blob w-96 h-96 bg-amber-300 top-12 left-10" aria-hidden="true"></div>
+      <div class="color-blob w-[500px] h-[500px] bg-rose-400 bottom-10 right-4" aria-hidden="true"></div>
+
+      <div class="max-w-7xl mx-auto px-6 sm:px-12 w-full relative z-10 pt-16 sm:pt-20 pb-12">
+        
+        <!-- Header Tag & Eyebrow -->
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/60 backdrop-blur border border-white/80 text-[11px] font-bold uppercase tracking-widest text-[#1A0B2E] shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
+            SUNRISE EXPERIENCE
+          </span>
+          <span class="text-xs font-bold tracking-[0.2em] uppercase text-[#1A0B2E]/80">
+            PREMIUM GROUP TRAVEL · INDORE
+          </span>
+        </div>
+
+        <!-- 2-Column Expansive Grid (Eliminates empty space) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          
+          <!-- Column 1: Headline, Ethos, CTAs, and Travel Essence Highlights -->
+          <div class="lg:col-span-6 flex flex-col justify-center">
+            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-[#1A0B2E] leading-[0.96]">
+              Your Journey.<br />
+              Our <span class="font-serif-italic font-normal text-slate-950 relative inline-block">
+                Passion.
+                <svg class="absolute -bottom-2 sm:-bottom-3 left-0 w-full h-3 sm:h-4 text-[#C5A059] overflow-visible" viewBox="0 0 100 12" fill="none" preserveAspectRatio="none">
+                  <path d="M2 9C25 3 75 3 98 9" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+                </svg>
+              </span>
+            </h1>
+
+            <!-- Artistic Reference Calligraphy Script: Travel In Comfort, Explore More -->
+            <div class="mt-3 flex items-center gap-3">
+              <span class="font-serif-italic text-2xl sm:text-3xl text-slate-900 tracking-tight">
+                “Travel In Comfort, Explore More”
+              </span>
+              <span class="h-0.5 w-12 bg-[#C5A059] rounded-full hidden sm:inline-block"></span>
+            </div>
+
+            <p class="mt-4 text-base sm:text-lg text-[#1A0B2E]/90 max-w-xl font-normal leading-relaxed">
+              Setting out from Indore together to create extraordinary shared stories across India. Plush seating, panoramic windows, and seasoned highway chauffeurs.
+            </p>
+
+            <!-- CTAs & Hotline Pill -->
+            <div class="mt-7 flex flex-wrap items-center gap-3.5">
+              <a href="#destinations" class="px-7 py-3.5 rounded-full bg-[#0F172A] text-white font-semibold text-sm tracking-wide shadow-xl hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 border border-amber-300/30 flex items-center gap-2" data-cursor="View">
+                <span>Explore Journeys</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 text-amber-400"></i>
+              </a>
+              <a href="#plan-trip" class="px-7 py-3.5 rounded-full bg-white/60 backdrop-blur-md text-[#1A0B2E] font-semibold text-sm tracking-wide border border-white/80 shadow-md hover:bg-white/80 transition-all hover:scale-105 active:scale-95 flex items-center gap-2" data-cursor="Plan">
+                <i data-lucide="message-circle" class="w-4 h-4 text-emerald-600"></i>
+                <span>Plan Your Trip</span>
+              </a>
+              <a href="tel:+919977159028" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/40 text-xs font-bold text-slate-900 border border-white/60 hover:bg-white/60 transition-colors">
+                <i data-lucide="phone-call" class="w-3.5 h-3.5 text-rose-600"></i>
+                <span>+91 99771 59028</span>
+              </a>
+            </div>
+
+            <!-- Travel Essence 4-Card Mini Bento Grid (Fills Space with High Value) -->
+            <div class="mt-8 grid grid-cols-2 gap-3 max-w-xl">
+              <div class="glass-ink p-3.5 rounded-2xl shadow-sm border border-white/60 flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-900 flex items-center justify-center shrink-0">
+                  <i data-lucide="users" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h2 class="text-xs font-bold text-[#1A0B2E]">16+1 Luxury Seats</h2>
+                  <p class="text-[11px] text-[#1A0B2E]/75 leading-tight mt-0.5">High-back pushback comfort for all</p>
+                </div>
+              </div>
+
+              <div class="glass-ink p-3.5 rounded-2xl shadow-sm border border-white/60 flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-rose-500/20 text-rose-900 flex items-center justify-center shrink-0">
+                  <i data-lucide="compass" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h2 class="text-xs font-bold text-[#1A0B2E]">Pan-India Tours</h2>
+                  <p class="text-[11px] text-[#1A0B2E]/75 leading-tight mt-0.5">Pilgrimages, beaches &amp; mountains</p>
+                </div>
+              </div>
+
+              <div class="glass-ink p-3.5 rounded-2xl shadow-sm border border-white/60 flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-900 flex items-center justify-center shrink-0">
+                  <i data-lucide="shield-check" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h2 class="text-xs font-bold text-[#1A0B2E]">Professional Captains</h2>
+                  <p class="text-[11px] text-[#1A0B2E]/75 leading-tight mt-0.5">Polite, seasoned highway experts</p>
+                </div>
+              </div>
+
+              <div class="glass-ink p-3.5 rounded-2xl shadow-sm border border-white/60 flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-900 flex items-center justify-center shrink-0">
+                  <i data-lucide="map-pin" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h2 class="text-xs font-bold text-[#1A0B2E]">Doorstep Indore Pickup</h2>
+                  <p class="text-[11px] text-[#1A0B2E]/75 leading-tight mt-0.5">Vijay Nagar, Palasia &amp; all areas</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Outstation Circuits Strip -->
+            <div class="mt-6 flex flex-wrap items-center gap-2 text-xs font-semibold text-[#1A0B2E]/80">
+              <span class="text-[10px] uppercase font-bold tracking-widest text-[#C5A059] bg-slate-900 text-white px-2 py-0.5 rounded">Popular</span>
+              <span>Ujjain Mahakal</span><span class="text-rose-600">•</span>
+              <span>Omkareshwar</span><span class="text-rose-600">•</span>
+              <span>Mandu</span><span class="text-rose-600">•</span>
+              <span>Goa</span><span class="text-rose-600">•</span>
+              <span>Pachmarhi</span><span class="text-rose-600">•</span>
+              <span>Rajasthan</span>
+            </div>
+
+          </div>
+
+          <!-- Column 2: Vehicle Stage with 3D Tilt, Warm Aura & Floating Chips -->
+          <div class="lg:col-span-6 relative flex flex-col items-center justify-center" id="hero-vehicle-wrapper">
+            
+            <!-- Sun Orb Glow Behind Vehicle -->
+            <div id="sun-orb" class="absolute w-72 sm:w-80 lg:w-[440px] h-72 sm:h-80 lg:h-[440px] rounded-full bg-gradient-to-t from-amber-400 via-amber-200 to-white/95 shadow-2xl opacity-90 -top-8 pointer-events-none" style="filter: drop-shadow(0 0 80px rgba(254,240,138,0.75));"></div>
+
+            <!-- Vehicle 40px Stage -->
+            <div id="hero-vehicle-stage" class="relative z-[2] w-full transition-transform duration-300 ease-out">
+              <div class="vehicle-stage-40 group hover:shadow-2xl transition-all duration-500">
+                <!-- Under-glow ambient warmth -->
+                <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 w-4/5 h-16 bg-amber-400/60 blur-3xl rounded-full" aria-hidden="true"></div>
+                
+                <img 
+                  src="/src/assets/images/regenerated_image_1791017075250.jpg" 
+                  alt="The Holiday Hype Luxury Touring Van - Travel In Comfort, Explore More" 
+                  class="w-full h-auto max-h-[460px] object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                  onerror="this.src='./vehicle.png'"
+                />
+
+                <!-- Stage Bottom Fleet Guarantee Strip -->
+                <div class="px-5 py-3 bg-white/90 backdrop-blur-md border-t border-white/80 flex items-center justify-between text-xs font-bold text-slate-900">
+                  <div class="flex items-center gap-1.5 text-blue-900">
+                    <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i>
+                    <span>Best In Comfort</span>
+                  </div>
+                  <span class="text-slate-400">•</span>
+                  <span>GPS Tracked</span>
+                  <span class="text-slate-400">•</span>
+                  <span class="text-emerald-700">Daily Sanitized</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         02 MORNING SKY (Ride)
+         ========================================================================= -->
+    <section id="ride" class="color-world world-morningsky z-[11]">
+      <!-- Curved SVG Divider into Morning Sky -->
+      <div class="color-world-divider text-[#BAE6FD]" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" fill="currentColor">
+          <path d="M0,28 C280,68 560,8 840,44 C1120,80 1320,24 1440,52 L1440,80 L0,80 Z" opacity="0.38" />
+          <path d="M0,44 C320,84 620,18 900,56 C1180,94 1340,36 1440,64 L1440,80 L0,80 Z" />
+        </svg>
+      </div>
+
+      <div class="color-blob w-80 h-80 bg-sky-200 top-10 right-10" aria-hidden="true"></div>
+      
+      <div class="max-w-7xl mx-auto px-6 sm:px-12 relative z-10">
+        
+        <!-- Section Header (No timings) -->
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/50 backdrop-blur border border-white/70 text-[11px] font-bold uppercase tracking-widest text-[#1A0B2E]">
+            LUXURY ON WHEELS
+          </span>
+          <span class="text-xs font-bold tracking-[0.2em] uppercase text-[#1A0B2E]/80">
+            OUR VEHICLE
+          </span>
+        </div>
+
+        <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[#1A0B2E]">
+          Meet Your <span class="font-serif-italic font-normal">Ride.</span>
+        </h2>
+        <p class="mt-4 text-base sm:text-lg text-[#1A0B2E]/85 max-w-2xl">
+          Crafted for joyful group discovery from start to finish, with all-round panoramic sightseeing and serene highway composure.
+        </p>
+
+        <!-- Desktop & Mobile Vehicle Presentation Grid -->
+        <div id="ride-container" class="mt-12 lg:mt-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          <!-- Vehicle Display Stage (40px rounded stage with actual vehicle photo & hotspots) -->
+          <div class="lg:col-span-7 vehicle-stage-40 p-4 sm:p-6 relative group" id="ride-stage">
+            <div class="w-full flex items-center justify-center overflow-hidden rounded-[28px] relative">
+              <img 
+                src="/src/assets/images/regenerated_image_1791017075250.jpg" 
+                alt="The Holiday Hype Touring Van" 
+                class="w-full h-auto object-cover rounded-[28px] shadow-lg transition-all duration-500 group-hover:scale-[1.02]"
+                id="ride-vehicle-img"
+                onerror="this.src='./vehicle.png'"
+              />
+
+              <!-- Interactive Vehicle Hotspots -->
+              <button type="button" class="hotspot-btn absolute bottom-[26%] left-[34%] z-10 w-7 h-7 rounded-full bg-amber-400 text-slate-950 font-bold flex items-center justify-center shadow-lg hover:scale-125 transition-transform" data-card="0" aria-label="Highlight Premium Comfort" title="Plush Reclining Seats">
+                <span class="animate-ping absolute inset-0 rounded-full bg-amber-300 opacity-75"></span>
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 relative z-10"></i>
+              </button>
+
+              <button type="button" class="hotspot-btn absolute top-[18%] left-[54%] z-10 w-7 h-7 rounded-full bg-sky-400 text-slate-950 font-bold flex items-center justify-center shadow-lg hover:scale-125 transition-transform" data-card="1" aria-label="Highlight Spacious Interiors" title="6.3 ft Stand-Up Height">
+                <span class="animate-ping absolute inset-0 rounded-full bg-sky-300 opacity-75"></span>
+                <i data-lucide="maximize" class="w-3.5 h-3.5 relative z-10"></i>
+              </button>
+
+              <button type="button" class="hotspot-btn absolute top-[30%] right-[22%] z-10 w-7 h-7 rounded-full bg-indigo-400 text-slate-950 font-bold flex items-center justify-center shadow-lg hover:scale-125 transition-transform" data-card="2" aria-label="Highlight Group Travel" title="16+1 Cabin Togetherness">
+                <span class="animate-ping absolute inset-0 rounded-full bg-indigo-300 opacity-75"></span>
+                <i data-lucide="users" class="w-3.5 h-3.5 relative z-10"></i>
+              </button>
+            </div>
+            
+            <!-- Stage Accent Banner -->
+            <div class="mt-4 pt-4 border-t border-slate-200/80 flex flex-wrap items-center justify-between text-xs font-semibold text-[#1A0B2E]/80">
+              <span class="flex items-center gap-1.5">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-blue-700"></i>
+                Indore Base Fleet
+              </span>
+              <span class="text-xs text-sky-800 font-bold flex items-center gap-1">
+                <i data-lucide="mouse-pointer" class="w-3.5 h-3.5"></i>
+                Click cards or vehicle markers to explore
+              </span>
+              <span>Pristine &amp; Sanitized Daily</span>
+            </div>
+          </div>
+
+          <!-- 4 Experience Cards (No specs, one line each with dynamic travel tips) -->
+          <div class="lg:col-span-5 flex flex-col gap-4" id="ride-cards">
+            
+            <div class="glass-ink p-6 rounded-[24px] shadow-sm hover:shadow-lg transition-all duration-300 border-l-4 border-l-sky-600 ride-card cursor-pointer group" data-idx="0" data-tip-title="Best for big families" data-tip-desc="Ideal for multi-generational families with elderly members seeking pushback comfort on 8+ hour continuous highway journeys." data-tip-badge="Family Favorite">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-800">
+                    <i data-lucide="armchair" class="w-5 h-5"></i>
+                  </div>
+                  <h3 class="text-xl font-bold text-[#1A0B2E]">Premium Comfort</h3>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-900/10 text-sky-950 font-bold text-[10px] tracking-wide border border-sky-900/15">
+                  <i data-lucide="lightbulb" class="w-3 h-3 text-amber-500"></i>
+                  <span>Best for big families</span>
+                </span>
+              </div>
+              <p class="text-sm text-[#1A0B2E]/80 leading-relaxed">
+                Plush reclining seats and soothing climate control make long scenic highway stretches feel effortless.
+              </p>
+            </div>
+
+            <div class="glass-ink p-6 rounded-[24px] shadow-sm hover:shadow-lg transition-all duration-300 border-l-4 border-l-sky-500 ride-card cursor-pointer group" data-idx="1" data-tip-title="Best for tall travelers & heavy luggage" data-tip-desc="Stand upright at 6.3 ft with zero hunching, spacious aisles, and generous boot space for all suitcases." data-tip-badge="Extra Headroom">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-800">
+                    <i data-lucide="maximize-2" class="w-5 h-5"></i>
+                  </div>
+                  <h3 class="text-xl font-bold text-[#1A0B2E]">Spacious Interiors</h3>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-900/10 text-sky-950 font-bold text-[10px] tracking-wide border border-sky-900/15">
+                  <i data-lucide="lightbulb" class="w-3 h-3 text-amber-500"></i>
+                  <span>Best for tall travelers</span>
+                </span>
+              </div>
+              <p class="text-sm text-[#1A0B2E]/80 leading-relaxed">
+                Walk tall with generous aisle headspace and stretch out comfortably without feeling cramped.
+              </p>
+            </div>
+
+            <div class="glass-ink p-6 rounded-[24px] shadow-sm hover:shadow-lg transition-all duration-300 border-l-4 border-l-indigo-500 ride-card cursor-pointer group" data-idx="2" data-tip-title="Best for wedding parties & friend squads" data-tip-desc="Keeps up to 17 travelers together in one party for nonstop banter, music playlists, and road-trip camaraderie." data-tip-badge="Squad Synergy">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-800">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                  </div>
+                  <h3 class="text-xl font-bold text-[#1A0B2E]">Group Travel</h3>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-900/10 text-indigo-950 font-bold text-[10px] tracking-wide border border-indigo-900/15">
+                  <i data-lucide="lightbulb" class="w-3 h-3 text-amber-500"></i>
+                  <span>Best for friend squads</span>
+                </span>
+              </div>
+              <p class="text-sm text-[#1A0B2E]/80 leading-relaxed">
+                Everyone stays together, shares stories, plays music, and cherishes the journey as one united party.
+              </p>
+            </div>
+
+            <div class="glass-ink p-6 rounded-[24px] shadow-sm hover:shadow-lg transition-all duration-300 border-l-4 border-l-teal-500 ride-card cursor-pointer group" data-idx="3" data-tip-title="Best for hill ghats & night highways" data-tip-desc="Certified highway captains with seasoned mountain driving skills ensure smooth suspension and peaceful rest." data-tip-badge="Ghats & Night Route">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-800">
+                    <i data-lucide="navigation" class="w-5 h-5"></i>
+                  </div>
+                  <h3 class="text-xl font-bold text-[#1A0B2E]">Smooth Experience</h3>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-teal-900/10 text-teal-950 font-bold text-[10px] tracking-wide border border-teal-900/15">
+                  <i data-lucide="lightbulb" class="w-3 h-3 text-amber-500"></i>
+                  <span>Best for ghats & night</span>
+                </span>
+              </div>
+              <p class="text-sm text-[#1A0B2E]/80 leading-relaxed">
+                Handled by seasoned highway navigators who prioritize passenger safety, punctuality, and serene rides.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Travel Essence Moments Bar (Fills section space with high emotional travel value) -->
+        <div class="mt-12 glass-ink p-6 sm:p-8 rounded-[28px] border border-white/70 shadow-md">
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+            <span class="text-xs font-bold uppercase tracking-wider text-sky-800 bg-white/80 px-3 py-1 rounded-full">The Travel Essence</span>
+            <span class="text-xs font-semibold text-[#1A0B2E]/70">Why traveling together from Indore feels special</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-white/45 border border-white/60">
+              <div class="w-9 h-9 rounded-full bg-amber-500/20 text-amber-900 flex items-center justify-center shrink-0">
+                <i data-lucide="sun" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-[#1A0B2E]">Highway Sunrises</h4>
+                <p class="text-[11px] text-[#1A0B2E]/75 mt-0.5 leading-snug">Golden dawn light washing through panoramic windows</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-white/45 border border-white/60">
+              <div class="w-9 h-9 rounded-full bg-rose-500/20 text-rose-900 flex items-center justify-center shrink-0">
+                <i data-lucide="coffee" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-[#1A0B2E]">Dhaba Chai Stops</h4>
+                <p class="text-[11px] text-[#1A0B2E]/75 mt-0.5 leading-snug">Hot tea, poha &amp; laughter at clean highway stops</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-white/45 border border-white/60">
+              <div class="w-9 h-9 rounded-full bg-indigo-500/20 text-indigo-900 flex items-center justify-center shrink-0">
+                <i data-lucide="music" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-[#1A0B2E]">Road-Trip Anthems</h4>
+                <p class="text-[11px] text-[#1A0B2E]/75 mt-0.5 leading-snug">Sing-along playlists on rich surround speakers</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-white/45 border border-white/60">
+              <div class="w-9 h-9 rounded-full bg-teal-500/20 text-teal-900 flex items-center justify-center shrink-0">
+                <i data-lucide="moon" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-[#1A0B2E]">Serene Highway Night</h4>
+                <p class="text-[11px] text-[#1A0B2E]/75 mt-0.5 leading-snug">Smooth suspension so children &amp; elders rest peacefully</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         03 LAGOON NOON (Destinations & Services)
+         ========================================================================= -->
+    <section id="destinations" class="color-world world-lagoon z-[12]">
+      <!-- Curved SVG Divider into Lagoon Noon -->
+      <div class="color-world-divider text-[#A7F3D0]" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" fill="currentColor">
+          <path d="M0,38 C360,10 680,78 1000,28 C1220,64 1360,20 1440,48 L1440,80 L0,80 Z" opacity="0.38" />
+          <path d="M0,54 C320,24 640,86 960,42 C1200,80 1360,32 1440,62 L1440,80 L0,80 Z" />
+        </svg>
+      </div>
+
+      <div class="color-blob w-96 h-96 bg-teal-200 top-16 left-8" aria-hidden="true"></div>
+
+      <div class="max-w-7xl mx-auto px-6 sm:px-12 relative z-10">
+        
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/50 backdrop-blur border border-white/70 text-[11px] font-bold uppercase tracking-widest text-[#1A0B2E]">
+            CURATED EXPEDITIONS
+          </span>
+          <span class="text-xs font-bold tracking-[0.2em] uppercase text-[#1A0B2E]/80">
+            WHERE WILL YOU GO NEXT?
+          </span>
+        </div>
+
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div>
+            <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[#1A0B2E]">
+              Where Will You <span class="font-serif-italic font-normal">Go Next?</span>
+            </h2>
+            <p class="mt-3 text-base sm:text-lg text-[#1A0B2E]/85 max-w-xl">
+              From spiritual spires along sacred rivers to sun-kissed coasts and misty mountain passes.
+            </p>
+          </div>
+          <a href="#plan-trip" class="inline-flex items-center gap-2 text-sm font-bold text-slate-900 bg-white/70 hover:bg-white px-5 py-2.5 rounded-full shadow-sm transition-all self-start md:self-auto" data-cursor="Plan">
+            <span>Custom Itinerary</span>
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+          </a>
+        </div>
+
+        <!-- 3-Column Editorial Grid on Desktop, Consistent Aspect Ratio Snap Rail on Small Screens -->
+        <div class="flex md:grid md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory no-scrollbar pb-3 md:pb-0 -mx-6 px-6 sm:-mx-12 sm:px-12 md:mx-0 md:px-0" id="destinations-track">
+
+          <!-- Card 1: Outstation Group Holidays (Goa, Himachal, Rajasthan, Kerala) -->
+          <div class="w-[84vw] max-w-[340px] sm:w-[48vw] md:w-auto shrink-0 md:shrink snap-start aspect-[4/5] sm:aspect-[4/5] md:aspect-auto glass-ink p-6 sm:p-7 rounded-[26px] sm:rounded-[28px] overflow-hidden group hover:-translate-y-1.5 transition-all duration-300 shadow-md flex flex-col justify-between md:min-h-[440px] relative">
+            <div class="relative z-10">
+              <span class="text-[11px] font-bold uppercase tracking-widest text-teal-800 bg-white/70 px-3 py-1 rounded-full">Pan-India Touring</span>
+              <h3 class="text-xl sm:text-2xl font-bold text-[#1A0B2E] mt-3">Outstation Group Holidays</h3>
+              <p class="text-xs sm:text-sm text-[#1A0B2E]/80 mt-2 line-clamp-2 md:line-clamp-none">Goa beaches, snowy Himachal heights, majestic Rajasthan forts, and calm Kerala backwaters.</p>
+            </div>
+            
+            <!-- Card 1 Image: outstation.jpeg -->
+            <div class="w-full h-44 sm:h-48 md:h-52 rounded-2xl overflow-hidden mt-4 md:mt-6 relative bg-gradient-to-b from-sky-200 via-amber-100 to-teal-100 border border-white/70 shrink-0 shadow-inner group-hover:scale-[1.02] transition-transform duration-500">
+              <img 
+                src="./outstation.jpeg" 
+                alt="Outstation Group Holidays - Goa, Himachal, Rajasthan & Kerala" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 block"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
+              />
+              <div class="w-full h-full hidden">
+                <svg class="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="none" fill="none">
+                  <defs>
+                    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#BAE6FD" />
+                      <stop offset="50%" stop-color="#FED7AA" />
+                      <stop offset="100%" stop-color="#CCFBF1" />
+                    </linearGradient>
+                    <linearGradient id="snowPeak" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#FFFFFF" />
+                      <stop offset="100%" stop-color="#7DD3FC" />
+                    </linearGradient>
+                    <linearGradient id="fortGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#D97706" />
+                      <stop offset="100%" stop-color="#92400E" />
+                    </linearGradient>
+                    <linearGradient id="seaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#0D9488" />
+                      <stop offset="100%" stop-color="#042F2E" />
+                    </linearGradient>
+                  </defs>
+                  <rect width="400" height="200" fill="url(#skyGrad)" />
+                  <circle cx="210" cy="55" r="32" fill="#F59E0B" fill-opacity="0.85" />
+                  <polygon points="50,110 95,45 140,110" fill="url(#snowPeak)" />
+                  <polygon points="110,115 160,35 210,115" fill="url(#snowPeak)" opacity="0.95" />
+                  <path d="M260 120 L260 90 L270 90 L270 95 L280 95 L280 90 L290 90 L290 95 L300 95 L300 85 L315 85 L315 95 L325 95 L325 90 L335 90 L335 120 Z" fill="url(#fortGrad)" />
+                  <path d="M0 135 C100 125 220 140 400 130 L400 200 L0 200 Z" fill="url(#seaGrad)" opacity="0.9" />
+                  <path d="M45 175 Q48 115 55 95" stroke="#134E4A" stroke-width="4.5" stroke-linecap="round" fill="none" />
+                </svg>
+              </div>
+              <!-- Descriptive Tag Overlay -->
+              <div class="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-white drop-shadow">
+                <span class="bg-slate-950/70 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/20">Goa • Himachal • Rajasthan • Kerala</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Religious Pilgrimages (Mahakal Ujjain, Omkareshwar, Sacred River Sanctums) -->
+          <div class="w-[84vw] max-w-[340px] sm:w-[48vw] md:w-auto shrink-0 md:shrink snap-start aspect-[4/5] sm:aspect-[4/5] md:aspect-auto glass-ink p-6 sm:p-7 rounded-[26px] sm:rounded-[28px] overflow-hidden group hover:-translate-y-1.5 transition-all duration-300 shadow-md flex flex-col justify-between md:min-h-[440px]">
+            <div class="relative z-10">
+              <span class="text-[11px] font-bold uppercase tracking-widest text-amber-900 bg-white/70 px-3 py-1 rounded-full">Sacred Circuits</span>
+              <h3 class="text-xl sm:text-2xl font-bold text-[#1A0B2E] mt-3">Religious Pilgrimages</h3>
+              <p class="text-xs sm:text-sm text-[#1A0B2E]/80 mt-2 line-clamp-2 md:line-clamp-none">Blessed group darshans to Mahakal Ujjain, Omkareshwar Jyotirlinga, and river sanctums.</p>
+            </div>
+            
+            <!-- Card 2 Image: religious.jpeg -->
+            <div class="w-full h-44 sm:h-48 md:h-52 rounded-2xl overflow-hidden mt-4 md:mt-6 relative bg-gradient-to-b from-indigo-950 via-amber-950 to-orange-950 border border-white/70 shrink-0 shadow-inner group-hover:scale-[1.02] transition-transform duration-500">
+              <img 
+                src="./religious.jpeg" 
+                alt="Religious Pilgrimages - Omkareshwar & Mahakal Ujjain Sacred Sanctums" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 block"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
+              />
+              <div class="w-full h-full hidden">
+                <svg class="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="none" fill="none">
+                  <defs>
+                    <linearGradient id="templeSky" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#1E1B4B" />
+                      <stop offset="45%" stop-color="#581C87" />
+                      <stop offset="75%" stop-color="#C2410C" />
+                      <stop offset="100%" stop-color="#F59E0B" />
+                    </linearGradient>
+                    <linearGradient id="templeStone" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#78350F" />
+                      <stop offset="50%" stop-color="#B45309" />
+                      <stop offset="100%" stop-color="#451A03" />
+                    </linearGradient>
+                  </defs>
+                  <rect width="400" height="200" fill="url(#templeSky)" />
+                  <path d="M165 140 L180 85 L190 35 L200 18 L210 35 L220 85 L235 140 Z" fill="url(#templeStone)" />
+                  <circle cx="200" cy="14" r="5" fill="#FBBF24" />
+                  <rect x="0" y="156" width="400" height="44" fill="#0F172A" />
+                </svg>
+              </div>
+              <!-- Descriptive Tag Overlay -->
+              <div class="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-white drop-shadow">
+                <span class="bg-slate-950/70 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/20">Mahakal Ujjain • Omkareshwar • Sacred Ghats</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Family Trips & Weekend Escapes (Mandu Arches, Pachmarhi Misty Hills & Hanuwantiya Waters) -->
+          <div class="w-[84vw] max-w-[340px] sm:w-[48vw] md:w-auto shrink-0 md:shrink snap-start aspect-[4/5] sm:aspect-[4/5] md:aspect-auto glass-ink p-6 sm:p-7 rounded-[26px] sm:rounded-[28px] overflow-hidden group hover:-translate-y-1.5 transition-all duration-300 shadow-md flex flex-col justify-between md:min-h-[440px]">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-widest text-emerald-800 bg-white/70 px-3 py-1 rounded-full">Getaways</span>
+              <h3 class="text-xl sm:text-2xl font-bold text-[#1A0B2E] mt-3">Family &amp; Weekend Escapes</h3>
+              <p class="text-xs sm:text-sm text-[#1A0B2E]/80 mt-2 line-clamp-2 md:line-clamp-none">Mandu fortress ruins, Pachmarhi viewpoints, Hanuwantiya water adventures, and Choral Dam.</p>
+            </div>
+            
+            <!-- Card 3 Image: family.png -->
+            <div class="w-full h-44 sm:h-48 md:h-52 rounded-2xl overflow-hidden mt-4 md:mt-6 relative bg-gradient-to-b from-sky-200 via-emerald-100 to-teal-100 border border-white/70 shrink-0 shadow-inner group-hover:scale-[1.02] transition-transform duration-500">
+              <img 
+                src="./family.png" 
+                alt="Family & Weekend Escapes - Pachmarhi The Queen of Satpura" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 block"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
+              />
+              <div class="w-full h-full hidden">
+                <svg class="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="none" fill="none">
+                  <defs>
+                    <linearGradient id="hillSky" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#BAE6FD" />
+                      <stop offset="100%" stop-color="#D1FAE5" />
+                    </linearGradient>
+                  </defs>
+                  <rect width="400" height="200" fill="url(#hillSky)" />
+                  <path d="M0 100 Q 80 50 180 85 T 340 70 Q 370 78 400 88 L 400 200 L 0 200 Z" fill="#059669" opacity="0.6" />
+                  <rect x="0" y="142" width="400" height="58" fill="#0284C7" />
+                </svg>
+              </div>
+              <!-- Descriptive Tag Overlay -->
+              <div class="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-white drop-shadow">
+                <span class="bg-slate-950/70 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/20">Mandu • Pachmarhi • Hanuwantiya • Choral</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Mobile Rail Interactive Controls (Visible only on small screens) -->
+        <div class="mt-5 flex md:hidden items-center justify-between px-1">
+          <div class="flex items-center gap-1.5">
+            <span class="dest-dot h-2 w-6 rounded-full bg-[#1A0B2E] transition-all duration-300"></span>
+            <span class="dest-dot h-2 w-2 rounded-full bg-[#1A0B2E]/25 transition-all duration-300"></span>
+            <span class="dest-dot h-2 w-2 rounded-full bg-[#1A0B2E]/25 transition-all duration-300"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="dest-counter" class="text-[11px] font-bold text-[#1A0B2E]/70 uppercase tracking-wider">1 of 3</span>
+            <div class="flex items-center gap-1">
+              <button type="button" id="dest-prev-btn" class="w-8 h-8 rounded-full bg-white/70 hover:bg-white text-slate-900 border border-white/80 flex items-center justify-center shadow-sm active:scale-95" aria-label="Previous destination">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <button type="button" id="dest-next-btn" class="w-8 h-8 rounded-full bg-white/70 hover:bg-white text-slate-900 border border-white/80 flex items-center justify-center shadow-sm active:scale-95" aria-label="Next destination">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Infinite Destinations Marquee -->
+        <div class="mt-16 overflow-hidden py-4 rounded-full bg-white/40 backdrop-blur-md border border-white/60">
+          <div class="marquee-track flex items-center gap-8 text-sm font-bold uppercase tracking-widest text-[#1A0B2E]/80">
+            <span>Ujjain Mahakal</span><span class="text-rose-600">✦</span>
+            <span>Omkareshwar</span><span class="text-teal-600">✦</span>
+            <span>Mandu Jahaz Mahal</span><span class="text-amber-600">✦</span>
+            <span>Pachmarhi Hills</span><span class="text-indigo-600">✦</span>
+            <span>Goa Sunsets</span><span class="text-rose-600">✦</span>
+            <span>Jaipur Palaces</span><span class="text-teal-600">✦</span>
+            <span>Udaipur Lakes</span><span class="text-amber-600">✦</span>
+            <span>Ranthambore</span><span class="text-indigo-600">✦</span>
+            <span>Manali Snow</span><span class="text-rose-600">✦</span>
+            <span>Shimla Ridges</span><span class="text-teal-600">✦</span>
+            <!-- Repeated for seamless loop -->
+            <span>Ujjain Mahakal</span><span class="text-rose-600">✦</span>
+            <span>Omkareshwar</span><span class="text-teal-600">✦</span>
+            <span>Mandu Jahaz Mahal</span><span class="text-amber-600">✦</span>
+            <span>Pachmarhi Hills</span><span class="text-indigo-600">✦</span>
+            <span>Goa Sunsets</span><span class="text-rose-600">✦</span>
+            <span>Jaipur Palaces</span><span class="text-teal-600">✦</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         04 GOLDEN HOUR (Why Holiday Hype)
+         ========================================================================= -->
+    <section id="why-us" class="color-world world-goldenhour z-[13]">
+      <!-- Curved SVG Divider into Golden Hour -->
+      <div class="color-world-divider text-[#FEF08A]" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" fill="currentColor">
+          <path d="M0,22 C260,74 520,16 780,58 C1040,98 1260,32 1440,58 L1440,80 L0,80 Z" opacity="0.38" />
+          <path d="M0,42 C300,90 600,28 880,68 C1160,104 1340,44 1440,68 L1440,80 L0,80 Z" />
+        </svg>
+      </div>
+
+      <div class="color-blob w-80 h-80 bg-amber-200 top-12 right-12" aria-hidden="true"></div>
+
+      <div class="max-w-7xl mx-auto px-6 sm:px-12 relative z-10">
+        
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/50 backdrop-blur border border-white/70 text-[11px] font-bold uppercase tracking-widest text-[#1A0B2E]">
+            THE HOLIDAY HYPE PROMISE
+          </span>
+          <span class="text-xs font-bold tracking-[0.2em] uppercase text-[#1A0B2E]/80">
+            WHY HOLIDAY HYPE
+          </span>
+        </div>
+
+        <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[#1A0B2E]">
+          Why The Holiday <span class="font-serif-italic font-normal">Hype.</span>
+        </h2>
+        <p class="mt-4 text-base sm:text-lg text-[#1A0B2E]/85 max-w-2xl">
+          Everything we do is designed to turn the journey itself into a joyful highlight of your travel memories.
+        </p>
+
+        <!-- Bento Grid of 5 Cards + 1 Wide Card -->
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <!-- Card 1: Comfort -->
+          <div class="glass-ink p-7 rounded-[28px] shadow-sm hover:shadow-xl transition-shadow duration-300 bento-card">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-900 flex items-center justify-center mb-5 pointer-events-none">
+              <i data-lucide="coffee" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#1A0B2E] mb-2 pointer-events-none">Unmatched Comfort</h3>
+            <p class="text-sm text-[#1A0B2E]/80 leading-relaxed pointer-events-none">
+              Ergonomic reclining seats, tranquil ambient lighting, and whisper-quiet ride dynamics on high-speed expressways.
+            </p>
+          </div>
+
+          <!-- Card 2: Reliability (verified chauffeurs) -->
+          <div class="glass-ink p-7 rounded-[28px] shadow-sm hover:shadow-xl transition-shadow duration-300 bento-card">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-900 flex items-center justify-center mb-5 pointer-events-none">
+              <i data-lucide="shield-check" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#1A0B2E] mb-2 pointer-events-none">Reliable &amp; Verified</h3>
+            <p class="text-sm text-[#1A0B2E]/80 leading-relaxed pointer-events-none">
+              Seasoned, courteous chauffeurs with rigorous background verification and thousands of long-haul highway miles.
+            </p>
+          </div>
+
+          <!-- Card 3: Space -->
+          <div class="glass-ink p-7 rounded-[28px] shadow-sm hover:shadow-xl transition-shadow duration-300 bento-card">
+            <div class="w-12 h-12 rounded-2xl bg-teal-500/20 text-teal-900 flex items-center justify-center mb-5 pointer-events-none">
+              <i data-lucide="maximize" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#1A0B2E] mb-2 pointer-events-none">Generous Space</h3>
+            <p class="text-sm text-[#1A0B2E]/80 leading-relaxed pointer-events-none">
+              Tall 6.3 ft stand-up height, roomy passenger aisle, and dedicated boot volume for heavy family luggage.
+            </p>
+          </div>
+
+          <!-- Card 4: Experience -->
+          <div class="glass-ink p-7 rounded-[28px] shadow-sm hover:shadow-xl transition-shadow duration-300 bento-card">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-900 flex items-center justify-center mb-5 pointer-events-none">
+              <i data-lucide="music" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#1A0B2E] mb-2 pointer-events-none">Joyful Experience</h3>
+            <p class="text-sm text-[#1A0B2E]/80 leading-relaxed pointer-events-none">
+              Sing-along playlists, highway snack pauses at the best hygienic food stops, and memories from the moment you board.
+            </p>
+          </div>
+
+          <!-- Card 5: Care with 24/7 support -->
+          <div class="glass-ink p-7 rounded-[28px] shadow-sm hover:shadow-xl transition-shadow duration-300 bento-card">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-900 flex items-center justify-center mb-5 pointer-events-none">
+              <i data-lucide="headset" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#1A0B2E] mb-2 pointer-events-none">24/7 Route Care</h3>
+            <p class="text-sm text-[#1A0B2E]/80 leading-relaxed pointer-events-none">
+              Continuous dispatch coordination, live trip tracking, and direct telephone assistance around the clock.
+            </p>
+          </div>
+
+          <!-- Wide Card: Travel Anywhere From Indore -->
+          <div class="md:col-span-2 lg:col-span-1 glass-ink p-7 rounded-[28px] shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between bg-gradient-to-br from-white/70 to-amber-100/70 border-2 border-amber-400/50 bento-card">
+            <div>
+              <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-900 bg-amber-300/80 px-2.5 py-1 rounded-full">Core Promise</span>
+              <h3 class="text-2xl font-black text-[#1A0B2E] mt-3 pointer-events-none">Travel Anywhere From Indore</h3>
+              <p class="text-sm text-[#1A0B2E]/85 mt-2 pointer-events-none">
+                No matter how distant or remote your dream destination is, our fleet is ready to roll at your doorstep.
+              </p>
+            </div>
+            <a href="tel:+919977159028" class="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-900 hover:text-amber-800">
+              <span>Talk to our Indore team</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         05 BLUSH (Stories)
+         ========================================================================= -->
+    <section id="stories" class="color-world world-blush z-[14]">
+      <!-- Curved SVG Divider into Blush Stories -->
+      <div class="color-world-divider text-[#FBCFE8]" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" fill="currentColor">
+          <path d="M0,28 C280,68 560,8 840,44 C1120,80 1320,24 1440,52 L1440,80 L0,80 Z" opacity="0.38" />
+          <path d="M0,44 C320,84 620,18 900,56 C1180,94 1340,36 1440,64 L1440,80 L0,80 Z" />
+        </svg>
+      </div>
+
+      <div class="color-blob w-96 h-96 bg-pink-200 top-10 left-10" aria-hidden="true"></div>
+
+      <div class="max-w-7xl mx-auto px-6 sm:px-12 relative z-10">
+        
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/50 backdrop-blur border border-white/70 text-[11px] font-bold uppercase tracking-widest text-[#1A0B2E]">
+            PASSENGER CHRONICLES
+          </span>
+          <span class="text-xs font-bold tracking-[0.2em] uppercase text-[#1A0B2E]/80">
+            VERIFIED REVIEWS
+          </span>
+        </div>
+
+        <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[#1A0B2E]">
+          Stories From The <span class="font-serif-italic font-normal">Road.</span>
+        </h2>
+        <p class="mt-4 text-base sm:text-lg text-[#1A0B2E]/85 max-w-xl">
+          Real joy shared by families, friends, and teams across hundreds of journeys out of Indore.
+        </p>
+
+        <!-- Draggable / Swipeable Review Carousel -->
+        <div class="mt-12 overflow-x-auto flex gap-6 pb-6 pt-2 snap-x snap-mandatory scrollbar-none cursor-grab active:cursor-grabbing" id="reviews-carousel">
+
+          <!-- Review Card 1 -->
+          <div class="min-w-[300px] sm:min-w-[360px] max-w-[380px] glass-ink p-7 rounded-[28px] snap-start flex flex-col justify-between shadow-md" data-sample="true">
+            <div>
+              <div class="flex items-center gap-1 text-amber-500 mb-4" aria-label="5 stars">
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              </div>
+              <p class="text-sm sm:text-base text-[#1A0B2E] italic leading-relaxed">
+                "Our extended family trip to Goa was completely stress-free. The vehicle was spotless, spacious enough for our elders to rest peacefully, and the driver was remarkably patient."
+              </p>
+            </div>
+            <div class="flex items-center gap-3 mt-6 pt-4 border-t border-black/10">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-400 to-amber-300 text-slate-950 font-bold flex items-center justify-center text-sm shadow">
+                RG
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-[#1A0B2E]">Rohit Goyal</h4>
+                <p class="text-xs text-[#1A0B2E]/70">Indore → Goa Vacation</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Review Card 2 -->
+          <div class="min-w-[300px] sm:min-w-[360px] max-w-[380px] glass-ink p-7 rounded-[28px] snap-start flex flex-col justify-between shadow-md" data-sample="true">
+            <div>
+              <div class="flex items-center gap-1 text-amber-500 mb-4" aria-label="5 stars">
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              </div>
+              <p class="text-sm sm:text-base text-[#1A0B2E] italic leading-relaxed">
+                "Booked for our corporate leadership conclave in Pachmarhi. Excellent legroom, crystal-clear sound, and on-time doorstep pickup in Vijay Nagar. Highly recommended!"
+              </p>
+            </div>
+            <div class="flex items-center gap-3 mt-6 pt-4 border-t border-black/10">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-teal-400 to-sky-300 text-slate-950 font-bold flex items-center justify-center text-sm shadow">
+                PS
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-[#1A0B2E]">Priyanka Sharma</h4>
+                <p class="text-xs text-[#1A0B2E]/70">Indore → Pachmarhi Retreat</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Review Card 3 -->
+          <div class="min-w-[300px] sm:min-w-[360px] max-w-[380px] glass-ink p-7 rounded-[28px] snap-start flex flex-col justify-between shadow-md" data-sample="true">
+            <div>
+              <div class="flex items-center gap-1 text-amber-500 mb-4" aria-label="5 stars">
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              </div>
+              <p class="text-sm sm:text-base text-[#1A0B2E] italic leading-relaxed">
+                "Ujjain Bhasma Aarti pilgrimage with all grandparents. The generous stand-up height meant no one had to duck or strain. Truly comfortable group travel in every way."
+              </p>
+            </div>
+            <div class="flex items-center gap-3 mt-6 pt-4 border-t border-black/10">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-400 to-rose-300 text-slate-950 font-bold flex items-center justify-center text-sm shadow">
+                VK
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-[#1A0B2E]">Vikram Khandelwal</h4>
+                <p class="text-xs text-[#1A0B2E]/70">Indore → Ujjain Pilgrimage</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Review Card 4 -->
+          <div class="min-w-[300px] sm:min-w-[360px] max-w-[380px] glass-ink p-7 rounded-[28px] snap-start flex flex-col justify-between shadow-md" data-sample="true">
+            <div>
+              <div class="flex items-center gap-1 text-amber-500 mb-4" aria-label="5 stars">
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              </div>
+              <p class="text-sm sm:text-base text-[#1A0B2E] italic leading-relaxed">
+                "Our friends drove all the way from Indore to Udaipur for a wedding. The vehicle felt royal, luggage fit seamlessly, and we had the best singing sessions on highway!"
+              </p>
+            </div>
+            <div class="flex items-center gap-3 mt-6 pt-4 border-t border-black/10">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-400 to-pink-300 text-slate-950 font-bold flex items-center justify-center text-sm shadow">
+                NM
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-[#1A0B2E]">Neha Mehta</h4>
+                <p class="text-xs text-[#1A0B2E]/70">Indore → Udaipur Wedding</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="mt-6 flex items-center gap-2 text-xs text-[#1A0B2E]/70">
+          <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+          <span>Swipe or drag horizontally to read more passenger memories</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         06 DUSK (The Feeling)
+         ========================================================================= -->
+    <section id="feeling" class="color-world world-dusk z-[15] relative">
+      <!-- Curved SVG Divider into Dusk Feeling -->
+      <div class="color-world-divider text-[#2E1065]" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" fill="currentColor">
+          <path d="M0,38 C360,10 680,78 1000,28 C1220,64 1360,20 1440,48 L1440,80 L0,80 Z" opacity="0.38" />
+          <path d="M0,54 C320,24 640,86 960,42 C1200,80 1360,32 1440,62 L1440,80 L0,80 Z" />
+        </svg>
+      </div>
+
+      <!-- Slow rotating conic-gradient glow in bounded container -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div class="absolute inset-0 flex items-center justify-center opacity-30">
+          <div class="w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-pink-600 via-purple-600 to-indigo-700 blur-[100px] animate-spin" style="animation-duration: 40s;"></div>
+        </div>
+      </div>
+
+      <div class="max-w-5xl mx-auto px-6 sm:px-12 relative z-10 py-16 sm:py-24 text-center">
+        
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-[11px] font-bold uppercase tracking-widest text-amber-300 mb-8">
+          THE TRAVEL ESSENCE
+        </div>
+
+        <!-- Giant Scrubbed Kinetic Statement -->
+        <h2 id="dusk-scrub-text" class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-tight">
+          <span class="scrub-word transition-opacity duration-300 inline-block opacity-25">Because</span>
+          <span class="scrub-word transition-opacity duration-300 inline-block opacity-25">the</span>
+          <span class="scrub-word transition-opacity duration-300 inline-block opacity-25 font-serif-italic font-normal text-amber-300">journey</span>
+          <span class="scrub-word transition-opacity duration-300 inline-block opacity-25">should</span>
+          <span class="scrub-word transition-opacity duration-300 inline-block opacity-25">be</span>
+          <span class="scrub-word transition-opacity duration-300 inline-block opacity-25">part</span>
+          <span class="scrub-word transition-opacity duration-300 inline-block opacity-25">of</span>
+          <span class="scrub-word transition-opacity duration-300 inline-block opacity-25">the</span>
+          <span class="scrub-word transition-opacity duration-300 inline-block opacity-25 font-serif-italic font-normal text-rose-300">memory.</span>
+        </h2>
+
+        <p class="mt-8 text-base sm:text-lg text-white/80 max-w-xl mx-auto">
+          More than just arriving. The laughter, the scenic horizons out panoramic windows, the freedom of traveling together.
+        </p>
+
+        <!-- Travel Essence Metrics Capsule Pill -->
+        <div class="mt-12 sm:mt-16 w-full max-w-4xl mx-auto rounded-[28px] sm:rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/20 shadow-2xl py-7 px-6 sm:px-10 transition-transform duration-300 hover:scale-[1.01]">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 items-center text-center">
+            
+            <!-- Metric 1: Trips Curated -->
+            <div class="flex flex-col items-center justify-center p-2">
+              <span class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-amber-300 drop-shadow-sm">500+</span>
+              <span class="text-[10px] sm:text-xs font-bold tracking-widest text-white/85 uppercase mt-1.5">TRIPS CURATED</span>
+            </div>
+
+            <!-- Metric 2: Happy Travelers -->
+            <div class="flex flex-col items-center justify-center p-2">
+              <span class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-sky-400 drop-shadow-sm">10,000+</span>
+              <span class="text-[10px] sm:text-xs font-bold tracking-widest text-white/85 uppercase mt-1.5">HAPPY TRAVELERS</span>
+            </div>
+
+            <!-- Metric 3: Guest Star Rating -->
+            <div class="flex flex-col items-center justify-center p-2">
+              <span class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-rose-400 drop-shadow-sm">4.9 / 5</span>
+              <span class="text-[10px] sm:text-xs font-bold tracking-widest text-white/85 uppercase mt-1.5">GUEST STAR RATING</span>
+            </div>
+
+            <!-- Metric 4: On-Time Departure -->
+            <div class="flex flex-col items-center justify-center p-2">
+              <span class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-emerald-400 drop-shadow-sm">100%</span>
+              <span class="text-[10px] sm:text-xs font-bold tracking-widest text-white/85 uppercase mt-1.5">ON-TIME DEPARTURE</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         07 TWILIGHT (Plan / Form)
+         ========================================================================= -->
+    <section id="plan-trip" class="color-world world-twilight z-[16]">
+      <!-- Curved SVG Divider into Twilight Reservations -->
+      <div class="color-world-divider text-[#1E1B4B]" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" fill="currentColor">
+          <path d="M0,22 C260,74 520,16 780,58 C1040,98 1260,32 1440,58 L1440,80 L0,80 Z" opacity="0.38" />
+          <path d="M0,42 C300,90 600,28 880,68 C1160,104 1340,44 1440,68 L1440,80 L0,80 Z" />
+        </svg>
+      </div>
+
+      <div class="color-blob w-96 h-96 bg-indigo-500 top-10 right-10" aria-hidden="true"></div>
+
+      <div class="max-w-5xl mx-auto px-6 sm:px-12 relative z-10">
+        
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-[11px] font-bold uppercase tracking-widest text-amber-300">
+            START YOUR EXPEDITION
+          </span>
+          <span class="text-xs font-bold tracking-[0.2em] uppercase text-white/80">
+            BOOKING &amp; RESERVATIONS
+          </span>
+        </div>
+
+        <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white">
+          Let’s Make Your Next Journey <span class="font-serif-italic font-normal text-amber-300">Happen.</span>
+        </h2>
+        <p class="mt-4 text-base sm:text-lg text-white/85 max-w-xl">
+          Tell us about your upcoming group trip from Indore. We’ll get back to you right away with seamless options.
+        </p>
+
+        <!-- Booking Form Glass Card -->
+        <div class="mt-12 glass-dark p-8 sm:p-12 rounded-[32px] shadow-2xl relative">
+          
+          <form id="booking-form" class="space-y-6" novalidate>
+            <div id="form-error-summary" class="sr-only" aria-live="polite"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <!-- Field 1: Name -->
+              <div class="relative">
+                <label for="field-name" class="block text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">
+                  Your Full Name <span class="text-rose-400">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="field-name" 
+                  name="name" 
+                  required 
+                  placeholder="e.g. Rahul Sharma"
+                  class="w-full px-5 py-4 rounded-2xl bg-white/10 border border-white/30 text-white placeholder-white/40 focus:outline-none focus:border-amber-400 focus:bg-white/15 transition-all text-sm"
+                />
+                <span class="error-msg text-xs text-rose-300 mt-1.5 hidden" id="err-name">Please enter your name.</span>
+              </div>
+
+              <!-- Field 2: Phone (Must be 10 digits) -->
+              <div class="relative">
+                <label for="field-phone" class="block text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">
+                  Mobile Number (10 Digits) <span class="text-rose-400">*</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-sm font-semibold pointer-events-none">+91</span>
+                  <input 
+                    type="tel" 
+                    id="field-phone" 
+                    name="phone" 
+                    required 
+                    minlength="10"
+                    maxlength="10"
+                    pattern="[0-9]{10}"
+                    inputmode="numeric"
+                    placeholder="9977159028"
+                    class="w-full pl-14 pr-5 py-4 rounded-2xl bg-white/10 border border-white/30 text-white placeholder-white/40 focus:outline-none focus:border-amber-400 focus:bg-white/15 transition-all text-sm font-mono tracking-wider"
+                  />
+                </div>
+                <span class="error-msg text-xs text-rose-300 mt-1.5 hidden" id="err-phone">Please enter a valid 10-digit mobile number.</span>
+              </div>
+
+              <!-- Field 3: Passenger Count with Presets & Custom Button -->
+              <div class="relative md:col-span-2">
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block text-xs font-bold uppercase tracking-wider text-amber-300">
+                    Passenger Count <span class="text-rose-400">*</span>
+                  </label>
+                  <span class="text-[11px] text-amber-300 font-semibold" id="pax-selected-preview">1 - 4 Passengers</span>
+                </div>
+                
+                <!-- Quick Passenger Chips + Custom Button -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5" id="pax-chips-group">
+                  <button type="button" class="pax-btn py-3 px-3 rounded-2xl border border-amber-300 bg-amber-400 text-slate-950 font-bold text-xs transition-all text-center cursor-pointer shadow-sm" data-value="1 - 4 Passengers">
+                    <span class="block font-bold text-sm">1 - 4</span>
+                    <span class="text-[10px] text-slate-900/80 font-medium">Small Family</span>
+                  </button>
+                  <button type="button" class="pax-btn py-3 px-3 rounded-2xl border border-white/20 bg-white/10 hover:bg-white/20 text-white font-medium text-xs transition-all text-center cursor-pointer" data-value="5 - 8 Passengers">
+                    <span class="block font-bold text-sm">5 - 8</span>
+                    <span class="text-[10px] text-white/60">Family &amp; Friends</span>
+                  </button>
+                  <button type="button" class="pax-btn py-3 px-3 rounded-2xl border border-white/20 bg-white/10 hover:bg-white/20 text-white font-medium text-xs transition-all text-center cursor-pointer" data-value="9 - 12 Passengers">
+                    <span class="block font-bold text-sm">9 - 12</span>
+                    <span class="text-[10px] text-white/60">Large Group</span>
+                  </button>
+                  <button type="button" class="pax-btn py-3 px-3 rounded-2xl border border-white/20 bg-white/10 hover:bg-white/20 text-white font-medium text-xs transition-all text-center cursor-pointer" data-value="13 - 17 Passengers">
+                    <span class="block font-bold text-sm">13 - 17</span>
+                    <span class="text-[10px] text-white/60">Full Tourer</span>
+                  </button>
+                  <button type="button" class="pax-btn py-3 px-3 rounded-2xl border border-white/20 bg-white/10 hover:bg-white/20 text-white font-medium text-xs transition-all text-center cursor-pointer" data-value="18+ Passengers">
+                    <span class="block font-bold text-sm">18+</span>
+                    <span class="text-[10px] text-white/60">Multi-Fleet</span>
+                  </button>
+                  <!-- Custom Button -->
+                  <button type="button" id="pax-btn-custom" class="pax-btn py-3 px-3 rounded-2xl border border-amber-400/50 bg-amber-400/15 hover:bg-amber-400/25 text-amber-200 font-bold text-xs transition-all text-center cursor-pointer flex flex-col items-center justify-center" data-value="custom">
+                    <span class="flex items-center gap-1 font-bold text-sm">
+                      <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-amber-300"></i> Custom
+                    </span>
+                    <span class="text-[10px] text-amber-300/80">Any Count</span>
+                  </button>
+                </div>
+
+                <!-- Custom Passenger Count Input Panel -->
+                <div id="custom-pax-panel" class="mt-3 hidden">
+                  <div class="relative">
+                    <input 
+                      type="number" 
+                      id="field-custom-passengers" 
+                      min="1" 
+                      max="100" 
+                      placeholder="Enter exact passenger count (e.g. 15)"
+                      class="w-full px-5 py-3.5 rounded-2xl bg-white/15 border border-amber-400/70 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm"
+                    />
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-amber-300 font-semibold pointer-events-none">Passengers</span>
+                  </div>
+                </div>
+
+                <!-- Hidden Input holding passenger value -->
+                <input type="hidden" id="field-passengers" name="passengers" value="1 - 4 Passengers" />
+                <span class="error-msg text-xs text-rose-300 mt-1.5 hidden" id="err-passengers">Please select or enter passenger count.</span>
+              </div>
+
+              <!-- Field 4: Destination / Route with 2 Tabs (From & To) -->
+              <div class="relative md:col-span-2">
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block text-xs font-bold uppercase tracking-wider text-amber-300">
+                    Destination / Route <span class="text-rose-400">*</span>
+                  </label>
+                  
+                  <!-- 2 Tabs: From and To -->
+                  <div class="inline-flex p-1 rounded-xl bg-white/10 border border-white/20 text-xs">
+                    <button 
+                      type="button" 
+                      id="tab-btn-from" 
+                      class="route-tab-btn px-3 py-1 rounded-lg font-bold text-xs transition-all cursor-pointer bg-amber-400 text-slate-950 shadow-sm"
+                      aria-selected="true"
+                    >
+                      From (Pickup)
+                    </button>
+                    <button 
+                      type="button" 
+                      id="tab-btn-to" 
+                      class="route-tab-btn px-3 py-1 rounded-lg font-bold text-xs transition-all cursor-pointer text-white/70 hover:text-white"
+                      aria-selected="false"
+                    >
+                      To (Destination)
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Dual Connected Route Inputs (From and To) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- From Tab Input -->
+                  <div class="relative">
+                    <label for="field-from" class="block text-[11px] font-semibold text-amber-200/90 mb-1 flex items-center justify-between">
+                      <span class="flex items-center gap-1.5">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        <span>From (Pickup Location)</span>
+                      </span>
+                      <button type="button" id="btn-reset-indore" class="text-[10px] text-amber-300/80 hover:text-amber-200 underline cursor-pointer">Set to Indore</button>
+                    </label>
+                    <input 
+                      type="text" 
+                      id="field-from" 
+                      name="from_location" 
+                      required 
+                      value="Indore"
+                      placeholder="e.g. Indore (Airport / Home / Hotel)"
+                      class="w-full px-5 py-4 rounded-2xl bg-white/10 border border-white/30 text-white placeholder-white/40 focus:outline-none focus:border-amber-400 focus:bg-white/15 transition-all text-sm"
+                    />
+                    <span class="error-msg text-xs text-rose-300 mt-1 hidden" id="err-from">Please enter pickup location (From).</span>
+                  </div>
+
+                  <!-- To Tab Input -->
+                  <div class="relative">
+                    <label for="field-to" class="block text-[11px] font-semibold text-amber-200/90 mb-1 flex items-center gap-1.5">
+                      <i data-lucide="navigation" class="w-3.5 h-3.5 text-amber-400"></i>
+                      <span>To (Destination / Circuit)</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      id="field-to" 
+                      name="to_location" 
+                      required 
+                      placeholder="e.g. Ujjain Mahakal, Omkareshwar, or Goa"
+                      class="w-full px-5 py-4 rounded-2xl bg-white/10 border border-white/30 text-white placeholder-white/40 focus:outline-none focus:border-amber-400 focus:bg-white/15 transition-all text-sm"
+                    />
+                    <span class="error-msg text-xs text-rose-300 mt-1 hidden" id="err-to">Please enter destination (To).</span>
+                  </div>
+                </div>
+
+                <!-- Quick Destination Chips -->
+                <div class="mt-2.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                  <span class="text-white/60 text-[10px] mr-1">Quick Select:</span>
+                  <button type="button" class="dest-chip px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 transition-all cursor-pointer" data-dest="Ujjain Mahakal & Omkareshwar Jyotirlinga">🕉️ Ujjain & Omkareshwar</button>
+                  <button type="button" class="dest-chip px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 transition-all cursor-pointer" data-dest="Goa Beach Holiday">🏖️ Goa</button>
+                  <button type="button" class="dest-chip px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 transition-all cursor-pointer" data-dest="Pachmarhi Hill Station">⛰️ Pachmarhi</button>
+                  <button type="button" class="dest-chip px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 transition-all cursor-pointer" data-dest="Maheshwar & Mandu Heritage">🏛️ Maheshwar & Mandu</button>
+                </div>
+              </div>
+
+              <!-- Field 5: Trip Start Date -->
+              <div class="relative">
+                <label for="field-date" class="block text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">
+                  Trip Start Date <span class="text-rose-400">*</span>
+                </label>
+                <input 
+                  type="date" 
+                  id="field-date" 
+                  name="start_date" 
+                  required 
+                  style="color-scheme: dark;"
+                  class="w-full px-5 py-4 rounded-2xl bg-white/10 border border-white/30 text-white placeholder-white/40 focus:outline-none focus:border-amber-400 focus:bg-white/15 transition-all text-sm"
+                />
+                <span class="error-msg text-xs text-rose-300 mt-1.5 hidden" id="err-date">Please select trip start date.</span>
+              </div>
+
+              <!-- Field 6: Trip End Date -->
+              <div class="relative">
+                <label for="field-end-date" class="block text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">
+                  Trip End Date <span class="text-rose-400">*</span>
+                </label>
+                <input 
+                  type="date" 
+                  id="field-end-date" 
+                  name="end_date" 
+                  required 
+                  style="color-scheme: dark;"
+                  class="w-full px-5 py-4 rounded-2xl bg-white/10 border border-white/30 text-white placeholder-white/40 focus:outline-none focus:border-amber-400 focus:bg-white/15 transition-all text-sm"
+                />
+                <span class="error-msg text-xs text-rose-300 mt-1.5 hidden" id="err-end-date">Please select trip end date.</span>
+              </div>
+
+            </div>
+
+            <!-- Submit Button (Opens WhatsApp with all details) -->
+            <div class="pt-4">
+              <button 
+                type="submit" 
+                class="w-full py-4 px-8 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold uppercase tracking-wider text-sm shadow-xl transition-all hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+                data-cursor="Plan"
+              >
+                <i data-lucide="message-circle" class="w-5 h-5 text-slate-950"></i>
+                <span>Connect On WhatsApp</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Direct Calling Row -->
+          <div class="mt-8 pt-8 border-t border-white/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/80">
+            <span class="font-medium">Prefer to talk right now? Call now:</span>
+            <div class="flex flex-wrap items-center gap-4">
+              <a href="tel:+919977159028" class="inline-flex items-center gap-2 text-amber-300 font-bold hover:underline">
+                <i data-lucide="phone-call" class="w-4 h-4 text-emerald-400"></i>
+                <span>+91 99771 59028</span>
+              </a>
+              <span class="text-white/40">|</span>
+              <a href="tel:+919926992777" class="inline-flex items-center gap-2 text-amber-300 font-bold hover:underline">
+                <i data-lucide="phone-call" class="w-4 h-4 text-emerald-400"></i>
+                <span>+91 99269 92777</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         08 NIGHT (Footer)
+         ========================================================================= -->
+    <footer id="footer" class="color-world world-night relative z-[17] pt-16 pb-24 text-white">
+      <!-- Curved SVG Divider into Midnight Night -->
+      <div class="color-world-divider text-[#0B1026]" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" fill="currentColor">
+          <path d="M0,28 C280,68 560,8 840,44 C1120,80 1320,24 1440,52 L1440,80 L0,80 Z" opacity="0.38" />
+          <path d="M0,44 C320,84 620,18 900,56 C1180,94 1340,36 1440,64 L1440,80 L0,80 Z" />
+        </svg>
+      </div>
+
+      <!-- 3px multicolor gradient hairline on top -->
+      <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-amber-400 via-rose-500 to-indigo-500 opacity-60" aria-hidden="true"></div>
+
+      <div class="max-w-7xl mx-auto px-6 sm:px-12">
+        
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-white/15">
+          
+          <!-- Brand Info with Official Logo Plate -->
+          <div class="md:col-span-5 space-y-4">
+            <div class="logo-plate px-5 py-2.5">
+              <img src="./logo.png" alt="The Holiday Hype Logo" class="h-10 sm:h-12 w-auto object-contain max-w-[210px]" onerror="this.outerHTML='<span class=\'text-slate-900 font-bold tracking-tight px-2\'>THE HOLIDAY HYPE</span>'" />
+            </div>
+            <p class="text-sm text-white/80 max-w-sm leading-relaxed">
+              Your Journey, Our Passion. Premium, joyful group travel experiences setting out from Indore to any destination across India.
+            </p>
+            <p class="text-xs text-amber-300/90 font-medium">
+              📍 Indore, Madhya Pradesh, India
+            </p>
+          </div>
+
+          <!-- Quick Navigation -->
+          <div class="md:col-span-3 space-y-3">
+            <h4 class="text-xs font-bold uppercase tracking-widest text-amber-400">Navigation</h4>
+            <ul class="space-y-2 text-sm text-white/70">
+              <li><a href="#hero" class="hover:text-white transition-colors">Home</a></li>
+              <li><a href="#ride" class="hover:text-white transition-colors">Our Vehicle Experience</a></li>
+              <li><a href="#destinations" class="hover:text-white transition-colors">Popular Journeys</a></li>
+              <li><a href="#why-us" class="hover:text-white transition-colors">Why Holiday Hype</a></li>
+              <li><a href="#stories" class="hover:text-white transition-colors">Passenger Stories</a></li>
+              <li><a href="#plan-trip" class="hover:text-white transition-colors">Plan Your Trip</a></li>
+            </ul>
+          </div>
+
+          <!-- Direct Inquiries & Contact -->
+          <div class="md:col-span-4 space-y-3">
+            <h4 class="text-xs font-bold uppercase tracking-widest text-amber-400">Direct Contact</h4>
+            <div class="space-y-2 text-sm text-white/80">
+              <p class="flex items-center gap-2">
+                <i data-lucide="phone" class="w-4 h-4 text-emerald-400"></i>
+                <a href="tel:+919977159028" class="hover:text-amber-300 font-medium">+91 99771 59028</a>
+              </p>
+              <p class="flex items-center gap-2">
+                <i data-lucide="phone" class="w-4 h-4 text-emerald-400"></i>
+                <a href="tel:+919926992777" class="hover:text-amber-300 font-medium">+91 99269 92777</a>
+              </p>
+              <p class="flex items-center gap-2">
+                <i data-lucide="message-square" class="w-4 h-4 text-emerald-400"></i>
+                <a href="https://wa.me/919977159028" target="_blank" rel="noopener noreferrer" class="hover:text-amber-300 font-medium">WhatsApp: +91 99771 59028</a>
+              </p>
+            </div>
+            <!-- Social Icons -->
+            <div class="flex items-center gap-3 pt-3">
+              <a href="#" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" aria-label="Instagram">
+                <i data-lucide="instagram" class="w-4 h-4"></i>
+              </a>
+              <a href="#" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" aria-label="Facebook">
+                <i data-lucide="facebook" class="w-4 h-4"></i>
+              </a>
+              <a href="https://wa.me/919977159028" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-emerald-600/80 hover:bg-emerald-600 flex items-center justify-center text-white transition-colors" aria-label="WhatsApp">
+                <i data-lucide="message-circle" class="w-4 h-4"></i>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50">
+          <p>© 2026 The Holiday Hype. All rights reserved. Travel in comfort, explore more.</p>
+          <p>Indore, Madhya Pradesh · Proudly Touring India</p>
+        </div>
+
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- =========================================================================
+       09 FLOATING DOCK (Bottom Center)
+       ========================================================================= -->
+  <aside id="floating-dock" class="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-[60] transition-all duration-300 pointer-events-auto" aria-label="Quick Communication Dock">
+    <div class="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 rounded-full bg-[#0B1026]/90 backdrop-blur-xl border border-white/20 shadow-2xl">
+      <!-- Call 1 -->
+      <a href="tel:+919977159028" class="flex items-center gap-1.5 sm:gap-2 text-white hover:text-amber-300 text-xs font-semibold px-2 sm:px-3 py-1.5 rounded-full hover:bg-white/10 transition-transform hover:scale-105 active:scale-95" aria-label="Call +91 99771 59028">
+        <i data-lucide="phone" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400"></i>
+        <span class="hidden sm:inline">99771 59028</span>
+      </a>
+
+      <div class="w-px h-5 bg-white/20"></div>
+
+      <!-- Quick Inquiries Button (Opens Simulated Chat Interface Popover/Modal) -->
+      <button id="open-chat-modal" type="button" class="relative flex items-center gap-1.5 sm:gap-2 text-white hover:text-amber-200 text-xs font-bold px-3 sm:px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/25 to-teal-500/25 hover:from-amber-500/35 hover:to-teal-500/35 border border-amber-400/40 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-sm" aria-label="Open Quick Inquiries Chat" aria-expanded="false" aria-controls="quick-inquiries-modal">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+        </span>
+        <i data-lucide="message-square-text" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300"></i>
+        <span>Quick Inquiries</span>
+      </button>
+
+      <div class="w-px h-5 bg-white/20"></div>
+
+      <!-- WhatsApp with pulsing green dot -->
+      <a href="https://wa.me/919977159028" target="_blank" rel="noopener noreferrer" class="relative flex items-center gap-1.5 sm:gap-2 text-white hover:text-emerald-300 text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-full bg-emerald-600/30 hover:bg-emerald-600/40 border border-emerald-500/40 transition-transform hover:scale-105 active:scale-95" aria-label="Chat on WhatsApp">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <i data-lucide="message-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400"></i>
+        <span class="hidden xs:inline sm:inline">WhatsApp</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Backdrop for Quick Inquiries Chat Modal (closes on backdrop click) -->
+  <div id="chat-modal-backdrop" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[85] opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+  <!-- Quick Inquiries Simulated Chat Modal / Popover -->
+  <div 
+    id="quick-inquiries-modal" 
+    class="fixed bottom-20 sm:bottom-24 right-3 sm:right-6 md:right-8 z-[90] w-[calc(100vw-24px)] max-w-[390px] rounded-[28px] bg-[#0B1026]/95 backdrop-blur-2xl border border-white/20 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.75)] text-white overflow-hidden transition-all duration-300 transform opacity-0 translate-y-6 scale-95 pointer-events-none origin-bottom-right flex flex-col"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="chat-modal-title"
+  >
+    <!-- Modal Header -->
+    <div class="bg-gradient-to-r from-[#1A0B2E] via-[#0B1026] to-[#0D9488]/30 px-4 py-3.5 border-b border-white/15 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <div class="w-9 h-9 rounded-full bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300 font-bold text-sm shadow-inner">
+            <i data-lucide="compass" class="w-4 h-4 text-amber-300"></i>
+          </div>
+          <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0B1026]"></span>
+        </div>
+        <div>
+          <h4 id="chat-modal-title" class="font-bold text-white text-xs sm:text-sm tracking-wide flex items-center gap-1.5">
+            Quick Inquiry Desk
+            <span class="text-[9px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-1.5 py-0.2 rounded-full">Live</span>
+          </h4>
+          <p class="text-[10px] text-white/70">The Holiday Hype • Typically replies in seconds</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1">
+        <a href="https://wa.me/919977159028" target="_blank" rel="noopener noreferrer" class="p-1.5 rounded-full hover:bg-white/10 text-emerald-400 hover:text-emerald-300 transition-colors" title="Switch to direct WhatsApp">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+        </a>
+        <button id="close-chat-modal" type="button" class="p-1.5 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer" aria-label="Close Quick Inquiries modal">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Messages Scrollable Area -->
+    <div id="chat-messages-container" class="h-[310px] sm:h-[340px] overflow-y-auto p-4 space-y-3 scroll-smooth text-xs" tabindex="0">
+      <!-- Welcome message -->
+      <div class="flex items-start gap-2.5">
+        <div class="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 shrink-0 text-xs font-bold">
+          THH
+        </div>
+        <div class="space-y-1 max-w-[85%]">
+          <div class="bg-white/10 border border-white/15 text-white/95 p-3 rounded-2xl rounded-tl-sm shadow-sm leading-relaxed">
+            <p>Namaste! 🙏 Welcome to <strong class="text-amber-300">The Holiday Hype</strong> quick desk.</p>
+            <p class="mt-1.5 text-white/80">How can we assist your trip planning today?</p>
+          </div>
+          <span class="text-[9px] text-white/40 pl-1">Just now</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Chips -->
+      <div id="chat-quick-chips" class="pt-1 flex flex-wrap gap-1.5">
+        <button type="button" class="chat-chip text-[11px] bg-white/10 hover:bg-amber-400/20 text-white hover:text-amber-200 border border-white/20 hover:border-amber-400/40 px-2.5 py-1 rounded-full transition-all cursor-pointer" data-query="Check Date Availability">
+          🗓️ Check Availability
+        </button>
+        <button type="button" class="chat-chip text-[11px] bg-white/10 hover:bg-amber-400/20 text-white hover:text-amber-200 border border-white/20 hover:border-amber-400/40 px-2.5 py-1 rounded-full transition-all cursor-pointer" data-query="Get Fare Estimate">
+          💰 Fare Estimate
+        </button>
+        <button type="button" class="chat-chip text-[11px] bg-white/10 hover:bg-amber-400/20 text-white hover:text-amber-200 border border-white/20 hover:border-amber-400/40 px-2.5 py-1 rounded-full transition-all cursor-pointer" data-query="Pilgrimage Circuit">
+          🕉️ Mahakal & Omkareshwar
+        </button>
+        <button type="button" class="chat-chip text-[11px] bg-white/10 hover:bg-amber-400/20 text-white hover:text-amber-200 border border-white/20 hover:border-amber-400/40 px-2.5 py-1 rounded-full transition-all cursor-pointer" data-query="Goa & Outstation">
+          🏖️ Goa & Outstation
+        </button>
+        <button type="button" class="chat-chip text-[11px] bg-white/10 hover:bg-amber-400/20 text-white hover:text-amber-200 border border-white/20 hover:border-amber-400/40 px-2.5 py-1 rounded-full transition-all cursor-pointer" data-query="Talk to Dispatch Team">
+          👨‍✈️ Talk to Planner
+        </button>
+      </div>
+
+      <!-- Typing Indicator (hidden by default) -->
+      <div id="chat-typing-indicator" class="hidden items-center gap-1.5 p-2.5 px-3 rounded-2xl bg-white/10 border border-white/15 w-fit text-slate-300">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style="animation-delay: 0ms;"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style="animation-delay: 150ms;"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style="animation-delay: 300ms;"></span>
+        <span class="text-[10px] text-white/60 ml-1">Desk is typing...</span>
+      </div>
+    </div>
+
+    <!-- Input Form & WhatsApp Transfer Footer -->
+    <div class="p-3 bg-[#0B1026] border-t border-white/15">
+      <form id="chat-input-form" class="flex items-center gap-2">
+        <input 
+          id="chat-user-input" 
+          type="text" 
+          autocomplete="off" 
+          placeholder="Ask about dates, routes, pricing..." 
+          class="flex-1 bg-white/10 hover:bg-white/15 focus:bg-white/20 text-white placeholder-white/45 text-xs px-3.5 py-2.5 rounded-full border border-white/20 focus:outline-none focus:border-amber-400 transition-all"
+        />
+        <button 
+          id="chat-send-btn" 
+          type="submit" 
+          class="w-8 h-8 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-transform cursor-pointer shrink-0" 
+          aria-label="Send message"
+        >
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+        </button>
+      </form>
+      <div class="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-white/60">
+        <span>Need instant booking?</span>
+        <a id="chat-direct-whatsapp" href="https://wa.me/919977159028?text=Hello%20The%20Holiday%20Hype%2C%20I%20have%20a%20quick%20inquiry%20regarding%20booking" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1">
+          <i data-lucide="message-circle" class="w-3 h-3"></i>
+          <span>Send via WhatsApp</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10-Digit Mobile Number Validation Popup Modal -->
+  <div id="phone-error-popup" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300" role="alertdialog" aria-modal="true" aria-labelledby="phone-popup-title">
+    <div id="phone-popup-card" class="w-full max-w-sm rounded-[28px] bg-[#0B1026] border border-amber-400/40 p-6 text-white shadow-2xl transform scale-95 transition-all duration-300 text-center relative overflow-hidden">
+      <div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/20 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="mx-auto w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 mb-4 shadow-inner">
+        <i data-lucide="phone-call" class="w-7 h-7 text-amber-400"></i>
+      </div>
+      <h3 id="phone-popup-title" class="text-lg font-bold text-white mb-2">Please check your contact number</h3>
+      <p class="text-xs text-white/80 leading-relaxed mb-6">
+        Mobile number must be <span class="font-bold text-amber-300">exactly 10 digits</span> (not more or less than 10 digits). Please verify and enter a valid contact number.
+      </p>
+      <button 
+        id="close-phone-popup-btn" 
+        type="button" 
+        class="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs uppercase tracking-wider shadow-lg transition-transform hover:scale-102 active:scale-98 cursor-pointer"
+      >
+        Check Contact Number
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Floating Travel Tip Popover (Section 02) -->
+  <div id="travel-tip-popover" class="fixed pointer-events-none z-[80] opacity-0 transition-opacity duration-200 glass-dark bg-slate-950/92 text-white p-3.5 rounded-2xl shadow-2xl border border-white/25 max-w-[280px] sm:max-w-xs text-xs backdrop-blur-xl">
+    <div class="flex items-center gap-1.5 text-amber-300 font-bold text-[10px] uppercase tracking-wider mb-1">
+      <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-400"></i>
+      <span id="tooltip-tag">TRAVEL TIP</span>
+    </div>
+    <p id="tooltip-title" class="font-bold text-white text-[13px] mb-1 leading-snug"></p>
+    <p id="tooltip-desc" class="text-white/80 leading-relaxed text-[11px]"></p>
+    <div id="tooltip-arrow" class="absolute -bottom-1.5 left-6 w-3 h-3 bg-slate-950/92 rotate-45 border-r border-b border-white/25"></div>
+  </div>
+
+  <!-- JAVASCRIPT & MOTION SYSTEM -->
+  <script>
+    // Immediate theme hydration to prevent flash
+    try {
+      if (localStorage.getItem('thh-theme') === 'day') {
+        document.documentElement.classList.add('theme-day');
+      }
+    } catch (e) {}
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.documentElement.classList.add('js-ready');
+      if (window.lucide) { lucide.createIcons(); }
+
+      // 0. Theme Toggle System (Night vs Daytime Theme)
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+      const themeToggleIcon = document.getElementById('theme-toggle-icon');
+      const themeToggleText = document.getElementById('theme-toggle-text');
+      const themeToggleThumb = document.getElementById('theme-toggle-thumb');
+      const themeToggleTrack = document.getElementById('theme-toggle-track');
+      const mobileThemeIcon = document.getElementById('mobile-theme-icon');
+      const mobileThemeText = document.getElementById('mobile-theme-text');
+
+      const applyTheme = (theme) => {
+        const isDay = theme === 'day';
+        if (isDay) {
+          document.documentElement.classList.add('theme-day');
+          if (themeToggleText) themeToggleText.textContent = 'Day';
+          if (themeToggleThumb) themeToggleThumb.style.transform = 'translateX(16px)';
+          if (themeToggleTrack) {
+            themeToggleTrack.classList.remove('bg-slate-800');
+            themeToggleTrack.classList.add('bg-amber-400');
+          }
+          if (themeToggleIcon) {
+            themeToggleIcon.setAttribute('data-lucide', 'sun');
+            themeToggleIcon.className = 'w-3.5 h-3.5 text-amber-500 transition-transform duration-300';
+          }
+          if (mobileThemeIcon) mobileThemeIcon.setAttribute('data-lucide', 'sun');
+          if (mobileThemeText) mobileThemeText.textContent = 'Day Theme';
+        } else {
+          document.documentElement.classList.remove('theme-day');
+          if (themeToggleText) themeToggleText.textContent = 'Night';
+          if (themeToggleThumb) themeToggleThumb.style.transform = 'translateX(0px)';
+          if (themeToggleTrack) {
+            themeToggleTrack.classList.remove('bg-amber-400');
+            themeToggleTrack.classList.add('bg-slate-800');
+          }
+          if (themeToggleIcon) {
+            themeToggleIcon.setAttribute('data-lucide', 'moon');
+            themeToggleIcon.className = 'w-3.5 h-3.5 text-indigo-600 transition-transform duration-300';
+          }
+          if (mobileThemeIcon) mobileThemeIcon.setAttribute('data-lucide', 'moon');
+          if (mobileThemeText) mobileThemeText.textContent = 'Night Theme';
+        }
+
+        try {
+          localStorage.setItem('thh-theme', theme);
+        } catch (e) {}
+
+        if (window.lucide) { lucide.createIcons(); }
+      };
+
+      // Load saved theme or default to 'night'
+      let currentTheme = 'night';
+      try {
+        const savedTheme = localStorage.getItem('thh-theme');
+        if (savedTheme === 'day' || savedTheme === 'night') {
+          currentTheme = savedTheme;
+        }
+      } catch (e) {}
+      applyTheme(currentTheme);
+
+      const handleThemeToggle = () => {
+        currentTheme = currentTheme === 'night' ? 'day' : 'night';
+        applyTheme(currentTheme);
+      };
+
+      if (themeToggleBtn) themeToggleBtn.addEventListener('click', handleThemeToggle);
+      if (themeToggleMobile) themeToggleMobile.addEventListener('click', handleThemeToggle);
+
+      // 1. Min Date on Form Datepickers (Start Date & End Date)
+      const dateInput = document.getElementById('field-date');
+      const endDateInput = document.getElementById('field-end-date');
+      if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+        if (!dateInput.value) dateInput.value = today;
+        if (endDateInput) {
+          endDateInput.min = today;
+          if (!endDateInput.value) endDateInput.value = today;
+          dateInput.addEventListener('change', () => {
+            if (dateInput.value) {
+              endDateInput.min = dateInput.value;
+              if (endDateInput.value && endDateInput.value < dateInput.value) {
+                endDateInput.value = dateInput.value;
+              }
+            }
+          });
+        }
+      }
+
+      // 2. Custom Cursor
+      const cursor = document.getElementById('cursor-ring');
+      const cursorLabel = document.getElementById('cursor-label');
+      if (cursor && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        window.addEventListener('mousemove', (e) => {
+          cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+        });
+        document.querySelectorAll('[data-cursor]').forEach((el) => {
+          el.addEventListener('mouseenter', () => {
+            cursor.classList.add('active-pointer');
+            if (cursorLabel) cursorLabel.textContent = el.getAttribute('data-cursor') || 'View';
+          });
+          el.addEventListener('mouseleave', () => {
+            cursor.classList.remove('active-pointer');
+          });
+        });
+      }
+
+      // 3. Navbar Scrolling Behavior & Progress Bar
+      const mainNav = document.getElementById('main-nav');
+      const progressBar = document.getElementById('scroll-progress-bar');
+      let lastScrollY = window.scrollY;
+
+      window.addEventListener('scroll', () => {
+        const currentY = window.scrollY;
+        // Progress bar
+        const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (progressBar && totalHeight > 0) {
+          const progress = (currentY / totalHeight) * 100;
+          progressBar.style.width = `${progress}%`;
+        }
+        // Floating pill transition
+        if (mainNav) {
+          if (currentY > 80) {
+            mainNav.classList.add('bg-white/85', 'backdrop-blur-md', 'shadow-md');
+            if (currentY > lastScrollY && currentY > 200) {
+              mainNav.style.transform = 'translateY(-100%)';
+            } else {
+              mainNav.style.transform = 'translateY(0)';
+            }
+          } else {
+            mainNav.classList.remove('bg-white/85', 'backdrop-blur-md', 'shadow-md');
+            mainNav.style.transform = 'translateY(0)';
+          }
+        }
+        lastScrollY = currentY;
+      }, { passive: true });
+
+      // 4. Mobile Menu Drawer
+      const mobileToggle = document.getElementById('mobile-toggle');
+      const mobileClose = document.getElementById('mobile-close');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      function openMenu() {
+        if (!mobileMenu) return;
+        mobileMenu.classList.remove('translate-x-full');
+        mobileToggle?.setAttribute('aria-expanded', 'true');
+        mobileMenu.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeMenu() {
+        if (!mobileMenu) return;
+        mobileMenu.classList.add('translate-x-full');
+        mobileToggle?.setAttribute('aria-expanded', 'false');
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      mobileToggle?.addEventListener('click', openMenu);
+      mobileClose?.addEventListener('click', closeMenu);
+      document.querySelectorAll('.mobile-nav-link').forEach(link => {
+        link.addEventListener('click', closeMenu);
+      });
+
+      // 5. Hide Floating Dock when Booking Form is in view
+      const bookingSection = document.getElementById('plan-trip');
+      const floatingDock = document.getElementById('floating-dock');
+      if (bookingSection && floatingDock && 'IntersectionObserver' in window) {
+        const obs = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              floatingDock.style.opacity = '0';
+              floatingDock.style.pointerEvents = 'none';
+              floatingDock.style.transform = 'translate(-50%, 20px)';
+            } else {
+              floatingDock.style.opacity = '1';
+              floatingDock.style.pointerEvents = 'auto';
+              floatingDock.style.transform = 'translate(-50%, 0)';
+            }
+          });
+        }, { threshold: 0.15 });
+        obs.observe(bookingSection);
+      }
+
+      // 6. 10-Digit Mobile Error Popup Controller
+      const phonePopup = document.getElementById('phone-error-popup');
+      const phonePopupCard = document.getElementById('phone-popup-card');
+      const closePhonePopupBtn = document.getElementById('close-phone-popup-btn');
+      const phoneInput = document.getElementById('field-phone');
+
+      const showPhonePopup = () => {
+        if (!phonePopup) return;
+        phonePopup.classList.remove('pointer-events-none', 'opacity-0');
+        phonePopup.classList.add('pointer-events-auto', 'opacity-100');
+        if (phonePopupCard) {
+          phonePopupCard.classList.remove('scale-95');
+          phonePopupCard.classList.add('scale-100');
+        }
+      };
+
+      const hidePhonePopup = () => {
+        if (!phonePopup) return;
+        phonePopup.classList.remove('pointer-events-auto', 'opacity-100');
+        phonePopup.classList.add('pointer-events-none', 'opacity-0');
+        if (phonePopupCard) {
+          phonePopupCard.classList.remove('scale-100');
+          phonePopupCard.classList.add('scale-95');
+        }
+        setTimeout(() => { phoneInput?.focus(); }, 100);
+      };
+
+      if (closePhonePopupBtn) {
+        closePhonePopupBtn.addEventListener('click', hidePhonePopup);
+      }
+      if (phonePopup) {
+        phonePopup.addEventListener('click', (e) => {
+          if (e.target === phonePopup) hidePhonePopup();
+        });
+      }
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && phonePopup && !phonePopup.classList.contains('pointer-events-none')) {
+          hidePhonePopup();
+        }
+      });
+
+      // 6b. Passenger Count Selector with Custom Button
+      const paxButtons = document.querySelectorAll('.pax-btn');
+      const paxCustomBtn = document.getElementById('pax-btn-custom');
+      const customPaxPanel = document.getElementById('custom-pax-panel');
+      const customPaxInput = document.getElementById('field-custom-passengers');
+      const hiddenPassengersInput = document.getElementById('field-passengers');
+      const paxSelectedPreview = document.getElementById('pax-selected-preview');
+
+      paxButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Reset styling for all buttons
+          paxButtons.forEach(b => {
+            b.classList.remove('bg-amber-400', 'text-slate-950', 'border-amber-300', 'font-bold');
+            if (b.id !== 'pax-btn-custom') {
+              b.classList.add('bg-white/10', 'text-white', 'border-white/20');
+            } else {
+              b.classList.add('bg-amber-400/15', 'text-amber-200', 'border-amber-400/50');
+            }
+          });
+
+          const val = btn.getAttribute('data-value');
+          if (val === 'custom') {
+            // Activate Custom button & open custom panel
+            btn.classList.remove('bg-amber-400/15', 'text-amber-200');
+            btn.classList.add('bg-amber-400', 'text-slate-950', 'border-amber-300', 'font-bold');
+            customPaxPanel?.classList.remove('hidden');
+            setTimeout(() => { customPaxInput?.focus(); }, 100);
+
+            if (customPaxInput && customPaxInput.value) {
+              const num = parseInt(customPaxInput.value, 10);
+              if (num > 0) {
+                hiddenPassengersInput.value = `${num} Passengers`;
+                if (paxSelectedPreview) paxSelectedPreview.textContent = `${num} Passengers (Custom)`;
+                document.getElementById('err-passengers')?.classList.add('hidden');
+              }
+            } else {
+              hiddenPassengersInput.value = '';
+              if (paxSelectedPreview) paxSelectedPreview.textContent = 'Enter custom count below';
+            }
+          } else {
+            // Preset button selected
+            btn.classList.remove('bg-white/10', 'text-white', 'border-white/20');
+            btn.classList.add('bg-amber-400', 'text-slate-950', 'border-amber-300', 'font-bold');
+            customPaxPanel?.classList.add('hidden');
+            hiddenPassengersInput.value = val;
+            if (paxSelectedPreview) paxSelectedPreview.textContent = val;
+            document.getElementById('err-passengers')?.classList.add('hidden');
+          }
+        });
+      });
+
+      if (customPaxInput) {
+        customPaxInput.addEventListener('input', () => {
+          const num = parseInt(customPaxInput.value, 10);
+          if (num > 0) {
+            hiddenPassengersInput.value = `${num} Passengers`;
+            if (paxSelectedPreview) paxSelectedPreview.textContent = `${num} Passengers (Custom)`;
+            document.getElementById('err-passengers')?.classList.add('hidden');
+          } else {
+            hiddenPassengersInput.value = '';
+          }
+        });
+      }
+
+      // 6c. Destination / Route 2 Tabs (From & To)
+      const tabBtnFrom = document.getElementById('tab-btn-from');
+      const tabBtnTo = document.getElementById('tab-btn-to');
+      const fieldFrom = document.getElementById('field-from');
+      const fieldTo = document.getElementById('field-to');
+      const btnResetIndore = document.getElementById('btn-reset-indore');
+      const destChips = document.querySelectorAll('.dest-chip');
+
+      const switchRouteTab = (tab) => {
+        if (tab === 'from') {
+          tabBtnFrom?.classList.add('bg-amber-400', 'text-slate-950', 'shadow-sm');
+          tabBtnFrom?.classList.remove('text-white/70');
+          tabBtnTo?.classList.remove('bg-amber-400', 'text-slate-950', 'shadow-sm');
+          tabBtnTo?.classList.add('text-white/70');
+          fieldFrom?.focus();
+        } else {
+          tabBtnTo?.classList.add('bg-amber-400', 'text-slate-950', 'shadow-sm');
+          tabBtnTo?.classList.remove('text-white/70');
+          tabBtnFrom?.classList.remove('bg-amber-400', 'text-slate-950', 'shadow-sm');
+          tabBtnFrom?.classList.add('text-white/70');
+          fieldTo?.focus();
+        }
+      };
+
+      tabBtnFrom?.addEventListener('click', () => switchRouteTab('from'));
+      tabBtnTo?.addEventListener('click', () => switchRouteTab('to'));
+
+      if (btnResetIndore && fieldFrom) {
+        btnResetIndore.addEventListener('click', () => {
+          fieldFrom.value = 'Indore';
+          document.getElementById('err-from')?.classList.add('hidden');
+        });
+      }
+
+      destChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          const dest = chip.getAttribute('data-dest');
+          if (fieldTo && dest) {
+            fieldTo.value = dest;
+            document.getElementById('err-to')?.classList.add('hidden');
+            switchRouteTab('to');
+          }
+        });
+      });
+
+      // 6d. Form Submission with 10-Digit Phone Popup & Updated WhatsApp Format
+      const bookingForm = document.getElementById('booking-form');
+      if (bookingForm) {
+        bookingForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+
+          const nameInput = document.getElementById('field-name');
+          const passengersInput = document.getElementById('field-passengers');
+          const fromInput = document.getElementById('field-from');
+          const toInput = document.getElementById('field-to');
+          const startDateInput = document.getElementById('field-date');
+          const endDateInput = document.getElementById('field-end-date');
+
+          let isValid = true;
+
+          // 1. Name validation
+          if (!nameInput.value.trim()) {
+            document.getElementById('err-name')?.classList.remove('hidden');
+            nameInput.focus();
+            nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            isValid = false;
+            return;
+          } else {
+            document.getElementById('err-name')?.classList.add('hidden');
+          }
+
+          // 2. Mobile number validation: MUST be exactly 10 digits
+          let cleanDigits = phoneInput.value.replace(/\D/g, '');
+          if (cleanDigits.length === 12 && cleanDigits.startsWith('91')) {
+            cleanDigits = cleanDigits.slice(2);
+          } else if (cleanDigits.length === 11 && cleanDigits.startsWith('0')) {
+            cleanDigits = cleanDigits.slice(1);
+          }
+
+          // Exactly 10 digits: do NOT show popup if exactly 10 digits
+          if (cleanDigits.length === 10) {
+            document.getElementById('err-phone')?.classList.add('hidden');
+          } else {
+            document.getElementById('err-phone')?.classList.remove('hidden');
+            showPhonePopup();
+            isValid = false;
+            return;
+          }
+
+          // 3. Passenger count fallback
+          if (!passengersInput.value) {
+            passengersInput.value = '1 - 4 Passengers';
+          }
+          document.getElementById('err-passengers')?.classList.add('hidden');
+
+          // 4. Destination / Route validation (From & To)
+          if (!fromInput.value.trim()) {
+            fromInput.value = 'Indore';
+          }
+          document.getElementById('err-from')?.classList.add('hidden');
+
+          if (!toInput.value.trim()) {
+            document.getElementById('err-to')?.classList.remove('hidden');
+            switchRouteTab('to');
+            toInput.focus();
+            toInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            isValid = false;
+            return;
+          } else {
+            document.getElementById('err-to')?.classList.add('hidden');
+          }
+
+          // 5. Trip Start Date validation
+          const todayIso = new Date().toISOString().split('T')[0];
+          if (!startDateInput.value) {
+            startDateInput.value = todayIso;
+          }
+          document.getElementById('err-date')?.classList.add('hidden');
+
+          // 6. Trip End Date validation
+          if (!endDateInput.value) {
+            endDateInput.value = startDateInput.value || todayIso;
+          }
+          if (startDateInput.value && endDateInput.value < startDateInput.value) {
+            const errEnd = document.getElementById('err-end-date');
+            if (errEnd) {
+              errEnd.textContent = 'Trip end date cannot be earlier than start date.';
+              errEnd.classList.remove('hidden');
+              endDateInput.focus();
+              endDateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            isValid = false;
+            return;
+          } else {
+            document.getElementById('err-end-date')?.classList.add('hidden');
+          }
+
+          if (!isValid) return;
+
+          // Format WhatsApp message with exact requested format
+          const destinationFormatted = `${fromInput.value.trim()} to ${toInput.value.trim()}`;
+          const rawMessage = `Hello *The Holiday Hype* 👋\nI'd like to plan a trip with you. Here are my details:\n\n👤 *Name:* ${nameInput.value.trim()}\n📞 *Phone:* ${cleanDigits}\n👥 *Passengers:* ${passengersInput.value}\n📍 *Destination:* ${destinationFormatted}\n🗓️ *Start date:* ${startDateInput.value}\n🏁 *End date:* ${endDateInput.value}\n\nPlease share availability and a quote for this trip. Thank you!\n\n_Sent from The Holiday Hype website_`;
+          const encodedMessage = encodeURIComponent(rawMessage);
+          const whatsappUrl = `https://wa.me/919977159028?text=${encodedMessage}`;
+
+          // Button feedback
+          const submitBtn = bookingForm.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            submitBtn.classList.add('opacity-90');
+            submitBtn.innerHTML = `
+              <i data-lucide="check-circle-2" class="w-5 h-5 text-slate-950"></i>
+              <span>Opening WhatsApp...</span>
+            `;
+            if (window.lucide) lucide.createIcons();
+          }
+
+          // Fallback banner with direct clickable link in case popup/redirection is restricted in iframe
+          let redirectBanner = document.getElementById('wa-redirect-banner');
+          if (!redirectBanner) {
+            redirectBanner = document.createElement('div');
+            redirectBanner.id = 'wa-redirect-banner';
+            redirectBanner.className = 'mt-4 p-4 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 text-white text-center text-sm shadow-xl';
+            bookingForm.appendChild(redirectBanner);
+          }
+          redirectBanner.innerHTML = `
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm">
+              <span class="text-emerald-200 font-medium">Opening WhatsApp with your trip details...</span>
+              <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold text-xs uppercase tracking-wider inline-flex items-center gap-1.5 shadow transition-transform hover:scale-105 cursor-pointer">
+                <span>Click here if not redirected</span> &rarr;
+              </a>
+            </div>
+          `;
+
+          // Method 1: Programmatic link click (target=_blank)
+          const waLink = document.createElement('a');
+          waLink.href = whatsappUrl;
+          waLink.target = '_blank';
+          waLink.rel = 'noopener noreferrer';
+          document.body.appendChild(waLink);
+          waLink.click();
+          setTimeout(() => { waLink.remove(); }, 300);
+
+          // Method 2: Attempt top-level or window navigation as fallback
+          setTimeout(() => {
+            try {
+              if (window.top && window.top !== window) {
+                window.top.location.href = whatsappUrl;
+              }
+            } catch (err) {
+              try { window.location.href = whatsappUrl; } catch (e) {}
+            }
+          }, 400);
+        });
+
+        // Strict 10-digit input restriction & validation
+        if (phoneInput) {
+          phoneInput.addEventListener('input', () => {
+            // Filter non-digits and cap strictly at maximum 10 digits
+            phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 10);
+            if (phoneInput.value.length === 10) {
+              document.getElementById('err-phone')?.classList.add('hidden');
+            }
+          });
+
+          phoneInput.addEventListener('blur', () => {
+            const clean = phoneInput.value.replace(/\D/g, '');
+            if (clean.length === 10) {
+              document.getElementById('err-phone')?.classList.add('hidden');
+            }
+          });
+        }
+      }
+
+      // 7. Interactive Hotspots & 3D Tilt Animations
+      const heroWrapper = document.getElementById('hero-vehicle-wrapper');
+      const heroStage = document.getElementById('hero-vehicle-stage');
+      if (heroWrapper && heroStage && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        heroWrapper.addEventListener('mousemove', (e) => {
+          const rect = heroWrapper.getBoundingClientRect();
+          const x = e.clientX - rect.left - rect.width / 2;
+          const y = e.clientY - rect.top - rect.height / 2;
+          const rotX = -(y / rect.height) * 10;
+          const rotY = (x / rect.width) * 12;
+          heroStage.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.02, 1.02, 1.02)`;
+        });
+        heroWrapper.addEventListener('mouseleave', () => {
+          heroStage.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        });
+      }
+
+      // Hotspots in Ride section
+      const hotspotButtons = document.querySelectorAll('.hotspot-btn');
+      const rideCards = document.querySelectorAll('.ride-card');
+      hotspotButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-card') || '0', 10);
+          rideCards.forEach((c, i) => {
+            if (i === idx) {
+              c.classList.add('bg-white/90', 'scale-[1.03]', 'shadow-xl');
+              c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+              c.classList.remove('bg-white/90', 'scale-[1.03]', 'shadow-xl');
+            }
+          });
+        });
+      });
+
+      rideCards.forEach((card, idx) => {
+        card.addEventListener('mouseenter', () => {
+          const vehicleImg = document.getElementById('ride-vehicle-img');
+          if (vehicleImg) {
+            vehicleImg.style.transform = `scale(1.03) rotate(${idx % 2 === 0 ? '0.6deg' : '-0.6deg'})`;
+          }
+        });
+        card.addEventListener('mouseleave', () => {
+          const vehicleImg = document.getElementById('ride-vehicle-img');
+          if (vehicleImg) {
+            vehicleImg.style.transform = 'scale(1) rotate(0deg)';
+          }
+        });
+      });
+
+      // 8. Motion & GSAP Integration
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Loader dismiss
+      const loader = document.getElementById('site-loader');
+      const loaderBar = document.getElementById('loader-bar');
+      if (loaderBar) loaderBar.style.width = '100%';
+      setTimeout(() => {
+        if (loader) {
+          loader.style.opacity = '0';
+          setTimeout(() => loader.remove(), 600);
+        }
+      }, 700);
+
+      // Setup Lenis & GSAP if available
+      if (window.gsap && window.ScrollTrigger && !prefersReducedMotion) {
+        gsap.registerPlugin(ScrollTrigger);
+
+        if (window.Lenis) {
+          const lenis = new Lenis({ duration: 1.1, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+          lenis.on('scroll', ScrollTrigger.update);
+          gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+          gsap.ticker.lagSmoothing(0);
+        }
+
+        // Hero Entrance
+        const sunOrb = document.getElementById('sun-orb');
+        if (sunOrb) {
+          gsap.fromTo(sunOrb, { y: 120, opacity: 0.3 }, { y: 0, opacity: 0.9, duration: 1.4, ease: 'power2.out' });
+        }
+        if (heroStage) {
+          gsap.fromTo(heroStage, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 1.2, delay: 0.2, ease: 'power3.out' });
+        }
+
+        // Color World Section Transitions with 'intersecting' Class Check
+        const colorWorldSections = gsap.utils.toArray('.color-world:not(:first-of-type)');
+        
+        // Native IntersectionObserver to ensure performant 'intersecting' class management
+        const sectionObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('intersecting');
+            } else if (entry.boundingClientRect.top > 0) {
+              entry.target.classList.remove('intersecting');
+            }
+          });
+        }, {
+          root: null,
+          rootMargin: '40px 0px -6% 0px',
+          threshold: [0, 0.08]
+        });
+
+        colorWorldSections.forEach((section) => {
+          sectionObserver.observe(section);
+
+          // Check if already in viewport on load/refresh
+          const isInitialIntersecting = section.classList.contains('intersecting') || 
+            (section.getBoundingClientRect().top < window.innerHeight * 0.9);
+
+          if (isInitialIntersecting) {
+            section.classList.add('intersecting');
+            gsap.set(section, { opacity: 1, y: 0, scale: 1 });
+          } else {
+            gsap.set(section, { opacity: 0.92, y: 44, scale: 0.985 });
+          }
+
+          // Subtle slide-up + scale-in entrance with 'intersecting' class verification
+          gsap.to(section, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 1.05,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 88%",
+              toggleActions: "play none none reverse",
+              onEnter: () => {
+                section.classList.add('intersecting');
+              },
+              onEnterBack: () => {
+                section.classList.add('intersecting');
+              },
+              onLeaveBack: () => {
+                section.classList.remove('intersecting');
+              }
+            }
+          });
+        });
+
+        // Dusk Scrub Text Animation
+        const scrubWords = gsap.utils.toArray('.scrub-word');
+        if (scrubWords.length > 0) {
+          gsap.to(scrubWords, {
+            opacity: 1,
+            stagger: 0.15,
+            scrollTrigger: {
+              trigger: "#dusk-scrub-text",
+              start: "top 80%",
+              end: "bottom 40%",
+              scrub: 1
+            }
+          });
+        }
+
+        // Section 02: Experience Cards ScrollTrigger Fade-in & Slide-up
+        const expCards = gsap.utils.toArray('.ride-card');
+        if (expCards.length > 0) {
+          gsap.fromTo(expCards, 
+            { 
+              opacity: 0, 
+              y: 45 
+            }, 
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.8,
+              stagger: 0.14,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: '#ride-cards',
+                start: 'top 82%',
+                toggleActions: 'play none none none'
+              }
+            }
+          );
+        }
+
+        // Section 04: Bento Grid Cards ScrollTrigger Fade-in & Slide-up
+        const bentoGridCards = gsap.utils.toArray('.bento-card');
+        if (bentoGridCards.length > 0) {
+          gsap.fromTo(bentoGridCards, 
+            { 
+              opacity: 0, 
+              y: 50 
+            }, 
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.85,
+              stagger: 0.12,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: '#why-us .grid',
+                start: 'top 82%',
+                toggleActions: 'play none none none'
+              }
+            }
+          );
+        }
+      }
+
+      // 9. Subtle Magnetic Hover Interaction on Bento Grid Cards
+      const bentoCards = document.querySelectorAll('.bento-card');
+      const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+      if (bentoCards.length > 0 && isFinePointer && !prefersReducedMotion) {
+        bentoCards.forEach((card) => {
+          const icon = card.querySelector('.w-12');
+
+          card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const relX = e.clientX - rect.left - rect.width / 2;
+            const relY = e.clientY - rect.top - rect.height / 2;
+
+            // Subtle magnetic pull + gentle 3D perspective tilt
+            const pullX = relX * 0.12;
+            const pullY = relY * 0.12;
+            const tiltX = -(relY / rect.height) * 7;
+            const tiltY = (relX / rect.width) * 7;
+
+            if (window.gsap) {
+              gsap.to(card, {
+                x: pullX,
+                y: pullY,
+                rotateX: tiltX,
+                rotateY: tiltY,
+                transformPerspective: 800,
+                duration: 0.32,
+                ease: 'power2.out',
+                overwrite: 'auto'
+              });
+
+              if (icon) {
+                gsap.to(icon, {
+                  x: pullX * 0.65,
+                  y: pullY * 0.65,
+                  duration: 0.32,
+                  ease: 'power2.out',
+                  overwrite: 'auto'
+                });
+              }
+            } else {
+              card.style.transform = `perspective(800px) translate3d(${pullX}px, ${pullY}px, 0) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+            }
+          });
+
+          card.addEventListener('mouseleave', () => {
+            if (window.gsap) {
+              gsap.to(card, {
+                x: 0,
+                y: 0,
+                rotateX: 0,
+                rotateY: 0,
+                duration: 0.65,
+                ease: 'elastic.out(1, 0.45)',
+                overwrite: 'auto'
+              });
+
+              if (icon) {
+                gsap.to(icon, {
+                  x: 0,
+                  y: 0,
+                  duration: 0.65,
+                  ease: 'elastic.out(1, 0.45)',
+                  overwrite: 'auto'
+                });
+              }
+            } else {
+              card.style.transform = 'perspective(800px) translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg)';
+            }
+          });
+        });
+      }
+
+      // 10. Interactive Dynamic Travel Tips Tooltip Plugin for Section 02
+      const tipPopover = document.getElementById('travel-tip-popover');
+      const tipTag = document.getElementById('tooltip-tag');
+      const tipTitle = document.getElementById('tooltip-title');
+      const tipDesc = document.getElementById('tooltip-desc');
+      const tipArrow = document.getElementById('tooltip-arrow');
+      const rideCardElements = document.querySelectorAll('.ride-card');
+
+      if (tipPopover && rideCardElements.length > 0) {
+        rideCardElements.forEach((card) => {
+          card.addEventListener('mouseenter', () => {
+            const title = card.getAttribute('data-tip-title') || 'Travel Tip';
+            const desc = card.getAttribute('data-tip-desc') || '';
+            const badge = card.getAttribute('data-tip-badge') || 'Travel Tip';
+
+            if (tipTag) tipTag.textContent = badge;
+            if (tipTitle) tipTitle.textContent = title;
+            if (tipDesc) tipDesc.textContent = desc;
+
+            const rect = card.getBoundingClientRect();
+            let top = rect.top - 105;
+            let left = rect.left + 24;
+
+            // Flip below if too close to viewport top
+            if (top < 75) {
+              top = rect.bottom + 12;
+              if (tipArrow) {
+                tipArrow.className = 'absolute -top-1.5 left-6 w-3 h-3 bg-slate-950/92 rotate-45 border-l border-t border-white/25';
+              }
+            } else {
+              if (tipArrow) {
+                tipArrow.className = 'absolute -bottom-1.5 left-6 w-3 h-3 bg-slate-950/92 rotate-45 border-r border-b border-white/25';
+              }
+            }
+
+            // Keep within window boundaries
+            if (left + 300 > window.innerWidth) {
+              left = window.innerWidth - 315;
+            }
+            if (left < 12) left = 12;
+
+            tipPopover.style.top = `${top}px`;
+            tipPopover.style.left = `${left}px`;
+
+            if (window.gsap) {
+              gsap.fromTo(tipPopover, 
+                { opacity: 0, y: 8, scale: 0.94 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.22, ease: 'power2.out', overwrite: 'auto' }
+              );
+            } else {
+              tipPopover.style.opacity = '1';
+            }
+          });
+
+          card.addEventListener('mouseleave', () => {
+            if (window.gsap) {
+              gsap.to(tipPopover, {
+                opacity: 0,
+                y: 6,
+                scale: 0.95,
+                duration: 0.18,
+                ease: 'power2.in',
+                overwrite: 'auto'
+              });
+            } else {
+              tipPopover.style.opacity = '0';
+            }
+          });
+        });
+      }
+
+      // 11. Destinations Mobile Rail Navigation & Active Dot Sync
+      const destTrack = document.getElementById('destinations-track');
+      const destDots = document.querySelectorAll('.dest-dot');
+      const destCounter = document.getElementById('dest-counter');
+      const destPrev = document.getElementById('dest-prev-btn');
+      const destNext = document.getElementById('dest-next-btn');
+
+      if (destTrack && destDots.length > 0) {
+        const updateDestActive = () => {
+          const scrollLeft = destTrack.scrollLeft;
+          const firstCard = destTrack.querySelector('.snap-start');
+          const cardWidth = firstCard ? firstCard.offsetWidth : 300;
+          const activeIndex = Math.min(Math.round(scrollLeft / (cardWidth + 16)), destDots.length - 1);
+
+          destDots.forEach((dot, idx) => {
+            if (idx === activeIndex) {
+              dot.classList.add('bg-[#1A0B2E]', 'w-6');
+              dot.classList.remove('bg-[#1A0B2E]/25', 'w-2');
+            } else {
+              dot.classList.remove('bg-[#1A0B2E]', 'w-6');
+              dot.classList.add('bg-[#1A0B2E]/25', 'w-2');
+            }
+          });
+
+          if (destCounter) {
+            destCounter.textContent = `${activeIndex + 1} of ${destDots.length}`;
+          }
+        };
+
+        destTrack.addEventListener('scroll', updateDestActive, { passive: true });
+
+        if (destPrev) {
+          destPrev.addEventListener('click', () => {
+            const firstCard = destTrack.querySelector('.snap-start');
+            const cardWidth = firstCard ? firstCard.offsetWidth : 300;
+            destTrack.scrollBy({ left: -(cardWidth + 16), behavior: 'smooth' });
+          });
+        }
+        if (destNext) {
+          destNext.addEventListener('click', () => {
+            const firstCard = destTrack.querySelector('.snap-start');
+            const cardWidth = firstCard ? firstCard.offsetWidth : 300;
+            destTrack.scrollBy({ left: (cardWidth + 16), behavior: 'smooth' });
+          });
+        }
+      }
+
+      // 12. Quick Inquiries Simulated Chat Modal Controller
+      const openChatBtn = document.getElementById('open-chat-modal');
+      const closeChatBtn = document.getElementById('close-chat-modal');
+      const chatModal = document.getElementById('quick-inquiries-modal');
+      const chatBackdrop = document.getElementById('chat-modal-backdrop');
+      const chatForm = document.getElementById('chat-input-form');
+      const chatInput = document.getElementById('chat-user-input');
+      const chatMessages = document.getElementById('chat-messages-container');
+      const typingIndicator = document.getElementById('chat-typing-indicator');
+      const quickChips = document.querySelectorAll('.chat-chip');
+      const directWaLink = document.getElementById('chat-direct-whatsapp');
+
+      if (openChatBtn && chatModal) {
+        let isChatOpen = false;
+
+        const escapeHTML = (str) => str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+
+        const openChat = () => {
+          isChatOpen = true;
+          chatModal.classList.remove('pointer-events-none', 'opacity-0', 'translate-y-6', 'scale-95');
+          chatModal.classList.add('pointer-events-auto', 'opacity-100', 'translate-y-0', 'scale-100');
+          openChatBtn.setAttribute('aria-expanded', 'true');
+          
+          if (chatBackdrop) {
+            chatBackdrop.classList.remove('pointer-events-none', 'opacity-0');
+            chatBackdrop.classList.add('pointer-events-auto', 'opacity-100');
+          }
+
+          if (window.lucide) { lucide.createIcons(); }
+          setTimeout(() => { chatInput?.focus(); }, 150);
+        };
+
+        const closeChat = () => {
+          isChatOpen = false;
+          chatModal.classList.remove('pointer-events-auto', 'opacity-100', 'translate-y-0', 'scale-100');
+          chatModal.classList.add('pointer-events-none', 'opacity-0', 'translate-y-6', 'scale-95');
+          openChatBtn.setAttribute('aria-expanded', 'false');
+
+          if (chatBackdrop) {
+            chatBackdrop.classList.remove('pointer-events-auto', 'opacity-100');
+            chatBackdrop.classList.add('pointer-events-none', 'opacity-0');
+          }
+        };
+
+        openChatBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (isChatOpen) {
+            closeChat();
+          } else {
+            openChat();
+          }
+        });
+
+        if (closeChatBtn) {
+          closeChatBtn.addEventListener('click', closeChat);
+        }
+
+        if (chatBackdrop) {
+          chatBackdrop.addEventListener('click', closeChat);
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && isChatOpen) {
+            closeChat();
+          }
+        });
+
+        // Chat response knowledge generator
+        const getSimulatedResponse = (query) => {
+          const lower = query.toLowerCase();
+          
+          if (lower.includes('date') || lower.includes('availability') || lower.includes('check')) {
+            return {
+              text: "We operate 11+1 luxury touring vehicles daily across Madhya Pradesh and Pan-India routes. When is your planned travel date and pickup location?",
+              waText: "Hello The Holiday Hype, I would like to check availability for my trip."
+            };
+          }
+          if (lower.includes('fare') || lower.includes('price') || lower.includes('cost') || lower.includes('rate') || lower.includes('estimate') || lower.includes('₹') || lower.includes('km')) {
+            return {
+              text: "Outstation touring starts from ₹28/km with zero hidden charges. Includes individual captain recliners, onboard dual AC, luggage boot, and verified driver. What route are you planning?",
+              waText: "Hello The Holiday Hype, could you share a fare quotation for our planned route?"
+            };
+          }
+          if (lower.includes('mahakal') || lower.includes('omkareshwar') || lower.includes('pilgrimage') || lower.includes('ujjain') || lower.includes('darshan') || lower.includes('temple')) {
+            return {
+              text: "Our sacred darshan tours cover Ujjain Mahakaleshwar Jyotirlinga, Omkareshwar Mandhata Island, and Narmada ghats with doorstep family pickup and comfortable seating for elders. Available as 1-Day or 2-Day circuits.",
+              waText: "Hello The Holiday Hype, I'd like to book the Mahakal & Omkareshwar Jyotirlinga pilgrimage tour."
+            };
+          }
+          if (lower.includes('goa') || lower.includes('outstation') || lower.includes('pachmarhi') || lower.includes('holiday') || lower.includes('tour')) {
+            return {
+              text: "For Goa, Pachmarhi, Himachal, or Rajasthan trips, our 11+1 vehicles feature aircraft-grade wide recliners, USB charging ports, and smooth suspension for long highway comfort.",
+              waText: "Hello The Holiday Hype, I'm interested in an outstation group holiday package."
+            };
+          }
+          if (lower.includes('dispatch') || lower.includes('talk') || lower.includes('planner') || lower.includes('call') || lower.includes('human') || lower.includes('phone') || lower.includes('agent')) {
+            return {
+              text: "Our senior trip dispatch team is available right now! You can call directly at +91 99771 59028 or connect via WhatsApp for priority confirmation.",
+              waText: "Hello The Holiday Hype, I'd like to talk directly with a trip planner."
+            };
+          }
+
+          return {
+            text: "Thank you for sharing your trip inquiry! Our travel desk can lock your dates and tailor the itinerary right now. Click below to continue with our booking manager on WhatsApp.",
+            waText: `Hello The Holiday Hype, I have an inquiry: ${query}`
+          };
+        };
+
+        const appendUserMessage = (text) => {
+          const userMsgDiv = document.createElement('div');
+          userMsgDiv.className = 'flex items-start justify-end gap-2 text-right';
+          userMsgDiv.innerHTML = `
+            <div class="space-y-1 max-w-[85%]">
+              <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-3 rounded-2xl rounded-tr-sm shadow-md leading-relaxed font-medium">
+                ${escapeHTML(text)}
+              </div>
+              <span class="text-[9px] text-white/40 pr-1">Just now</span>
+            </div>
+          `;
+          
+          if (typingIndicator) {
+            chatMessages.insertBefore(userMsgDiv, typingIndicator);
+          } else {
+            chatMessages.appendChild(userMsgDiv);
+          }
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+
+        const appendBotResponse = (respObj) => {
+          const botMsgDiv = document.createElement('div');
+          botMsgDiv.className = 'flex items-start gap-2.5';
+          const waEncoded = encodeURIComponent(respObj.waText);
+          const waUrl = `https://wa.me/919977159028?text=${waEncoded}`;
+
+          botMsgDiv.innerHTML = `
+            <div class="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 shrink-0 text-xs font-bold">
+              THH
+            </div>
+            <div class="space-y-2 max-w-[85%]">
+              <div class="bg-white/10 border border-white/15 text-white/95 p-3 rounded-2xl rounded-tl-sm shadow-sm leading-relaxed">
+                <p>${respObj.text}</p>
+                <div class="mt-2.5 pt-2 border-t border-white/10">
+                  <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600/40 hover:bg-emerald-600/60 border border-emerald-400/40 text-emerald-200 text-[11px] font-bold transition-all hover:scale-102 active:scale-98">
+                    <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-300"></i>
+                    <span>Confirm on WhatsApp</span>
+                  </a>
+                </div>
+              </div>
+              <span class="text-[9px] text-white/40 pl-1">Just now</span>
+            </div>
+          `;
+
+          if (typingIndicator) {
+            chatMessages.insertBefore(botMsgDiv, typingIndicator);
+          } else {
+            chatMessages.appendChild(botMsgDiv);
+          }
+
+          if (directWaLink) {
+            directWaLink.href = waUrl;
+          }
+
+          if (window.lucide) { lucide.createIcons(); }
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+
+        const handleChatAction = (queryText) => {
+          if (!queryText || !queryText.trim()) return;
+          const cleanText = queryText.trim();
+          appendUserMessage(cleanText);
+
+          // Show typing animation
+          if (typingIndicator) {
+            typingIndicator.classList.remove('hidden');
+            typingIndicator.classList.add('flex');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }
+
+          setTimeout(() => {
+            if (typingIndicator) {
+              typingIndicator.classList.remove('flex');
+              typingIndicator.classList.add('hidden');
+            }
+            const responseData = getSimulatedResponse(cleanText);
+            appendBotResponse(responseData);
+          }, 450);
+        };
+
+        // Quick chip clicks
+        quickChips.forEach(chip => {
+          chip.addEventListener('click', () => {
+            const query = chip.getAttribute('data-query');
+            handleChatAction(query);
+          });
+        });
+
+        // Form submit
+        if (chatForm && chatInput) {
+          chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const val = chatInput.value;
+            if (!val.trim()) return;
+            chatInput.value = '';
+            handleChatAction(val);
+          });
+        }
+      }
+
+      // Refresh Lucide icons
+      if (window.lucide) { lucide.createIcons(); }
+    });
+  </script>
+</body>
+</html>

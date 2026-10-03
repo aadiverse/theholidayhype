@@ -1,0 +1,6 @@
+{
+  "name": "The Holiday Hype",
+  "description": "Premium, joyful group travel experiences from Indore, India. Travel anywhere in comfort and style.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

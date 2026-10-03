@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 450" width="1000" height="450" fill="none">
+  <!-- Crown on Top -->
+  <g fill="#0F2042">
+    <path d="M440 85 L455 45 L475 75 L500 20 L525 75 L545 45 L560 85 C540 92 460 92 440 85 Z" />
+    <circle cx="455" cy="40" r="5" />
+    <circle cx="475" cy="70" r="5" />
+    <circle cx="500" cy="15" r="6" />
+    <circle cx="525" cy="70" r="5" />
+    <circle cx="545" cy="40" r="5" />
+    <!-- Crown base arch -->
+    <path d="M442 88 C 470 98 530 98 558 88 C 555 93 545 96 500 96 C 455 96 445 93 442 88 Z" />
+  </g>
+
+  <!-- Wing Left -->
+  <g fill="#0F2042">
+    <!-- Feather 1 (Top) -->
+    <path d="M425 155 C 380 90 280 50 275 60 C 270 70 340 120 415 168 Z" />
+    <!-- Feather 2 (Mid) -->
+    <path d="M415 170 C 350 115 285 85 280 95 C 275 105 345 150 410 185 Z" />
+    <!-- Feather 3 (Bottom) -->
+    <path d="M410 188 C 360 145 305 125 300 135 C 295 145 350 178 405 200 Z" />
+    <!-- Feather 4 (Small lower) -->
+    <path d="M405 202 C 375 175 330 160 328 170 C 325 178 365 200 405 212 Z" />
+  </g>
+
+  <!-- Wing Right -->
+  <g fill="#0F2042">
+    <!-- Feather 1 (Top) -->
+    <path d="M575 155 C 620 90 720 50 725 60 C 730 70 660 120 585 168 Z" />
+    <!-- Feather 2 (Mid) -->
+    <path d="M585 170 C 650 115 715 85 720 95 C 725 105 655 150 590 185 Z" />
+    <!-- Feather 3 (Bottom) -->
+    <path d="M590 188 C 640 145 695 125 700 135 C 705 145 650 178 595 200 Z" />
+    <!-- Feather 4 (Small lower) -->
+    <path d="M595 202 C 625 175 670 160 672 170 C 675 178 635 200 595 212 Z" />
+  </g>
+
+  <!-- Center Medallion Ring -->
+  <circle cx="500" cy="155" r="70" stroke="#0F2042" stroke-width="10" fill="none" />
+  <!-- Center 'H' Serif letter -->
+  <text x="500" y="182" font-family="'Cinzel', 'Playfair Display', 'Times New Roman', Georgia, serif" font-size="82" font-weight="bold" fill="#0F2042" text-anchor="middle">H</text>
+
+  <!-- Brand Title: The Holiday Hype -->
+  <text x="500" y="320" font-family="'Playfair Display', 'Cinzel', 'Times New Roman', Georgia, serif" font-size="96" font-weight="700" fill="#0F2042" text-anchor="middle" letter-spacing="1.5">The Holiday Hype</text>
+
+  <!-- Tagline: YOUR JOURNEY, OUR PASSION with Gold Rules -->
+  <!-- Left gold line -->
+  <line x1="115" y1="375" x2="205" y2="375" stroke="#C5A059" stroke-width="3.5" stroke-linecap="round" />
+  <!-- Text -->
+  <text x="500" y="384" font-family="'Inter', 'Montserrat', Arial, sans-serif" font-size="30" font-weight="600" fill="#C5A059" text-anchor="middle" letter-spacing="11">YOUR JOURNEY, OUR PASSION</text>
+  <!-- Right gold line -->
+  <line x1="795" y1="375" x2="885" y2="375" stroke="#C5A059" stroke-width="3.5" stroke-linecap="round" />
+</svg>
