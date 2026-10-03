@@ -38,10 +38,25 @@ ARCHITECTURE & DESIGN SYSTEM
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Holiday Hype | Premium Joyful Group Travel From Indore</title>
   <meta name="description" content="Travel anywhere from Indore with The Holiday Hype. Joyful, premium group travel experiences, chauffeur-driven comfort, and unforgettable journeys." />
+  
+  <!-- Primary Site Domain & Canonical URL (Change here to update site URL across social previews) -->
+  <!-- SITE_URL: https://theholidayhype.vercel.app/ -->
+  <link rel="canonical" href="https://theholidayhype.vercel.app/" />
+
+  <!-- OpenGraph / Facebook / WhatsApp Share Preview Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://theholidayhype.vercel.app/" />
   <meta property="og:title" content="The Holiday Hype | Premium Joyful Group Travel From Indore" />
   <meta property="og:description" content="Your journey, our passion. Travel in comfort and explore more together with The Holiday Hype." />
-  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://theholidayhype.vercel.app/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="The Holiday Hype - premium group travel from Indore" />
+
+  <!-- Twitter / X Share Card Meta Tags -->
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://theholidayhype.vercel.app/og-image.jpg" />
+
   <meta name="theme-color" content="#FF6B5B" />
   <link rel="icon" type="image/png" href="./logo.png" />
   <link rel="preload" href="/src/assets/images/regenerated_image_1791017075250.jpg" as="image" fetchpriority="high" />
@@ -58,13 +73,13 @@ ARCHITECTURE & DESIGN SYSTEM
   <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Schema.org JSON-LD -->
+  <!-- Schema.org JSON-LD (TravelAgency) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "TravelAgency",
     "name": "The Holiday Hype",
-    "image": "./logo.png",
+    "image": "https://theholidayhype.vercel.app/logo.png",
     "telephone": ["+919977159028", "+919926992777"],
     "address": {
       "@type": "PostalAddress",
@@ -73,7 +88,10 @@ ARCHITECTURE & DESIGN SYSTEM
       "addressCountry": "IN"
     },
     "areaServed": "IN",
-    "url": "https://theholidayhype.com",
+    "url": "https://theholidayhype.vercel.app/",
+    "sameAs": [
+      "https://www.instagram.com/theholiday_hype4/"
+    ],
     "priceRange": "$$"
   }
   </script>
@@ -584,6 +602,12 @@ ARCHITECTURE & DESIGN SYSTEM
     html.theme-day #quick-inquiries-modal .border-white\/10 {
       border-color: #E2E8F0 !important;
     }
+
+    /* Instagram button contrast lock */
+    .ig-connect-btn,
+    .ig-connect-btn span {
+      color: #FFFFFF !important;
+    }
   </style>
 </head>
 <body class="antialiased selection:bg-amber-400 selection:text-slate-900">
@@ -697,6 +721,28 @@ ARCHITECTURE & DESIGN SYSTEM
         <a href="tel:+919977159028" class="text-amber-400 font-bold text-base hover:underline">+91 99771 59028</a>
         <a href="tel:+919926992777" class="text-amber-400 font-bold text-base hover:underline">+91 99269 92777</a>
       </div>
+
+      <!-- Instagram Connection Button (Mobile Menu) -->
+      <a 
+        href="https://www.instagram.com/theholiday_hype4/" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        aria-label="Follow The Holiday Hype on Instagram" 
+        class="ig-connect-btn flex items-center justify-center gap-3 w-full py-3 px-5 rounded-full bg-[#0F172A] hover:bg-slate-900 text-white shadow-md border border-white/20 hover:border-pink-500/40 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-amber-400"
+      >
+        <span class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 shadow" style="background: linear-gradient(45deg, #F77737, #E1306C, #833AB4);">
+          <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+          </svg>
+        </span>
+        <span class="flex flex-col text-left leading-none">
+          <span class="text-xs font-bold text-white tracking-wide">Connect on Instagram</span>
+          <span class="text-[10px] text-white/70 font-medium tracking-tight mt-0.5">@theholiday_hype4</span>
+        </span>
+      </a>
+
       <a href="#plan-trip" class="mobile-nav-link block text-center w-full py-3.5 rounded-full bg-gradient-to-r from-amber-400 to-rose-500 text-slate-950 font-bold uppercase tracking-wider text-xs shadow-lg">
         Plan Your Journey
       </a>
@@ -1870,20 +1916,18 @@ ARCHITECTURE & DESIGN SYSTEM
                 <span class="error-msg text-xs text-rose-300 mt-1.5 hidden" id="err-date">Please select trip start date.</span>
               </div>
 
-              <!-- Field 6: Trip End Date -->
+              <!-- Field 6: Trip End Date (Optional) -->
               <div class="relative">
                 <label for="field-end-date" class="block text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">
-                  Trip End Date <span class="text-rose-400">*</span>
+                  Trip End Date
                 </label>
                 <input 
                   type="date" 
                   id="field-end-date" 
                   name="end_date" 
-                  required 
                   style="color-scheme: dark;"
                   class="w-full px-5 py-4 rounded-2xl bg-white/10 border border-white/30 text-white placeholder-white/40 focus:outline-none focus:border-amber-400 focus:bg-white/15 transition-all text-sm"
                 />
-                <span class="error-msg text-xs text-rose-300 mt-1.5 hidden" id="err-end-date">Please select trip end date.</span>
               </div>
 
             </div>
@@ -1915,6 +1959,29 @@ ARCHITECTURE & DESIGN SYSTEM
                 <span>+91 99269 92777</span>
               </a>
             </div>
+          </div>
+
+          <!-- Instagram Connection Button (Spot A: Centered) -->
+          <div class="mt-6 pt-6 border-t border-white/10 flex justify-center">
+            <a 
+              href="https://www.instagram.com/theholiday_hype4/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              aria-label="Follow The Holiday Hype on Instagram" 
+              class="ig-connect-btn inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#0F172A] hover:bg-slate-900 text-white shadow-xl border border-white/20 hover:border-pink-500/40 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-amber-400 group cursor-pointer"
+            >
+              <span class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 shadow" style="background: linear-gradient(45deg, #F77737, #E1306C, #833AB4);">
+                <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+                </svg>
+              </span>
+              <span class="flex flex-col text-left leading-none">
+                <span class="text-xs font-bold text-white tracking-wide">Connect on Instagram</span>
+                <span class="text-[10px] text-white/70 font-medium tracking-tight mt-0.5">@theholiday_hype4</span>
+              </span>
+            </a>
           </div>
 
         </div>
@@ -1984,16 +2051,41 @@ ARCHITECTURE & DESIGN SYSTEM
                 <a href="https://wa.me/919977159028" target="_blank" rel="noopener noreferrer" class="hover:text-amber-300 font-medium">WhatsApp: +91 99771 59028</a>
               </p>
             </div>
-            <!-- Social Icons -->
-            <div class="flex items-center gap-3 pt-3">
-              <a href="#" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" aria-label="Instagram">
-                <i data-lucide="instagram" class="w-4 h-4"></i>
+
+            <!-- Instagram Connection Button (Spot B: Footer Direct Contact Column) -->
+            <div class="pt-2">
+              <a 
+                href="https://www.instagram.com/theholiday_hype4/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                aria-label="Follow The Holiday Hype on Instagram" 
+                class="ig-connect-btn inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#0F172A] hover:bg-slate-900 text-white shadow-md border border-white/20 hover:border-pink-500/40 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-amber-400 group cursor-pointer"
+              >
+                <span class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 shadow" style="background: linear-gradient(45deg, #F77737, #E1306C, #833AB4);">
+                  <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+                  </svg>
+                </span>
+                <span class="flex flex-col text-left leading-none">
+                  <span class="text-xs font-bold text-white tracking-wide">Connect on Instagram</span>
+                  <span class="text-[9px] text-white/70 font-medium tracking-tight mt-0.5">@theholiday_hype4</span>
+                </span>
               </a>
-              <a href="#" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" aria-label="Facebook">
-                <i data-lucide="facebook" class="w-4 h-4"></i>
-              </a>
-              <a href="https://wa.me/919977159028" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-emerald-600/80 hover:bg-emerald-600 flex items-center justify-center text-white transition-colors" aria-label="WhatsApp">
+            </div>
+
+            <!-- Social Icons (WhatsApp & Instagram Only) -->
+            <div class="flex items-center gap-3 pt-2">
+              <a href="https://wa.me/919977159028" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-emerald-600/80 hover:bg-emerald-600 flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 shadow-sm" aria-label="Chat on WhatsApp">
                 <i data-lucide="message-circle" class="w-4 h-4"></i>
+              </a>
+              <a href="https://www.instagram.com/theholiday_hype4/" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 shadow-sm" style="background: linear-gradient(45deg, #F77737, #E1306C, #833AB4);" aria-label="Follow The Holiday Hype on Instagram">
+                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+                </svg>
               </a>
             </div>
           </div>
@@ -2279,7 +2371,6 @@ ARCHITECTURE & DESIGN SYSTEM
         if (!dateInput.value) dateInput.value = today;
         if (endDateInput) {
           endDateInput.min = today;
-          if (!endDateInput.value) endDateInput.value = today;
           dateInput.addEventListener('change', () => {
             if (dateInput.value) {
               endDateInput.min = dateInput.value;
@@ -2609,29 +2700,21 @@ ARCHITECTURE & DESIGN SYSTEM
           }
           document.getElementById('err-date')?.classList.add('hidden');
 
-          // 6. Trip End Date validation
-          if (!endDateInput.value) {
-            endDateInput.value = startDateInput.value || todayIso;
-          }
-          if (startDateInput.value && endDateInput.value < startDateInput.value) {
-            const errEnd = document.getElementById('err-end-date');
-            if (errEnd) {
-              errEnd.textContent = 'Trip end date cannot be earlier than start date.';
-              errEnd.classList.remove('hidden');
-              endDateInput.focus();
-              endDateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-            isValid = false;
-            return;
-          } else {
-            document.getElementById('err-end-date')?.classList.add('hidden');
+          // 6. Trip End Date validation (OPTIONAL)
+          // If an end date is chosen, its minimum is the selected start date, and the same day is allowed
+          if (endDateInput.value && startDateInput.value && endDateInput.value < startDateInput.value) {
+            endDateInput.value = startDateInput.value;
           }
 
           if (!isValid) return;
 
           // Format WhatsApp message with exact requested format
           const destinationFormatted = `${fromInput.value.trim()} to ${toInput.value.trim()}`;
-          const rawMessage = `Hello *The Holiday Hype* 👋\nI'd like to plan a trip with you. Here are my details:\n\n👤 *Name:* ${nameInput.value.trim()}\n📞 *Phone:* ${cleanDigits}\n👥 *Passengers:* ${passengersInput.value}\n📍 *Destination:* ${destinationFormatted}\n🗓️ *Start date:* ${startDateInput.value}\n🏁 *End date:* ${endDateInput.value}\n\nPlease share availability and a quote for this trip. Thank you!\n\n_Sent from The Holiday Hype website_`;
+          const endDateFormatted = endDateInput.value && endDateInput.value.trim()
+            ? endDateInput.value.trim()
+            : 'Same day / Not decided yet';
+
+          const rawMessage = `Hello *The Holiday Hype* 👋\nI'd like to plan a trip with you. Here are my details:\n\n👤 *Name:* ${nameInput.value.trim()}\n📞 *Phone:* ${cleanDigits}\n👥 *Passengers:* ${passengersInput.value}\n📍 *Destination:* ${destinationFormatted}\n🗓️ *Start date:* ${startDateInput.value}\n🏁 *End date:* ${endDateFormatted}\n\nPlease share availability and a quote for this trip. Thank you!\n\n_Sent from The Holiday Hype website_`;
           const encodedMessage = encodeURIComponent(rawMessage);
           const whatsappUrl = `https://wa.me/919977159028?text=${encodedMessage}`;
 
